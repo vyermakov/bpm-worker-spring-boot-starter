@@ -3,6 +3,7 @@ package com.jeevision.bpm.worker.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jeevision.bpm.worker.annotation.BPMError;
 import com.jeevision.bpm.worker.annotation.BPMResult;
+import com.jeevision.bpm.worker.annotation.BPMVariable;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskService;
