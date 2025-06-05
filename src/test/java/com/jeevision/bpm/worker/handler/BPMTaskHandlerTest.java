@@ -86,8 +86,8 @@ class BPMTaskHandlerTest {
 
         // Assert
         verify(externalTaskService).complete(eq(externalTask), any(Map.class));
-        verify(externalTaskService, never()).handleBpmnError(any(), any(), any(), any());
-        verify(externalTaskService, never()).handleFailure(any(), any(), any(), anyInt(), anyLong());
+        verify(externalTaskService, never()).handleBpmnError(any(ExternalTask.class), any(), any(), any());
+        verify(externalTaskService, never()).handleFailure(any(ExternalTask.class), any(), any(), anyInt(), anyLong());
     }
 
     @Test
@@ -135,7 +135,7 @@ class BPMTaskHandlerTest {
         // Assert
         verify(externalTaskService).handleBpmnError(eq(externalTask), eq("BUSINESS_ERROR"), eq("Business validation failed"), any(Map.class));
         verify(externalTaskService, never()).complete(any(), any());
-        verify(externalTaskService, never()).handleFailure(any(), any(), any(), anyInt(), anyLong());
+        verify(externalTaskService, never()).handleFailure(any(ExternalTask.class), any(), any(), anyInt(), anyLong());
     }
 
     @Test
@@ -174,7 +174,7 @@ class BPMTaskHandlerTest {
         // Assert
         verify(externalTaskService).handleFailure(eq(externalTask), eq("Runtime error occurred"), anyString(), eq(3), eq(10000L));
         verify(externalTaskService, never()).complete(any(), any());
-        verify(externalTaskService, never()).handleBpmnError(any(), any(), any(), any());
+        verify(externalTaskService, never()).handleBpmnError(any(ExternalTask.class), any(), any(), any());
     }
 
     @Test
@@ -353,7 +353,7 @@ class BPMTaskHandlerTest {
     }
 
     public static class TestWorkerWithError {
-        @BPMError(errorMappings = {
+        @BPMError(errorCode = "DEFAULT_ERROR", errorMappings = {
             @BPMError.ErrorMapping(exception = IllegalArgumentException.class, errorCode = "BUSINESS_ERROR", errorMessage = "Business validation failed")
         })
         public String processTaskWithError(@BPMVariable("input") String input) {
