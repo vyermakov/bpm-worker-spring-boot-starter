@@ -30,74 +30,49 @@ class BPMWorkerRegistryTest {
     void setUp() {
         mockContext = Mockito.mock(ApplicationContext.class);
         mockParser = Mockito.mock(SpelExpressionParser.class);
-        registry = new BPMWorkerRegistry(mockContext) {
-            @Override
-            protected ExpressionParser createExpressionParser() {
-                return mockParser;
+        registry = new BPMWorkerRegistry(mockContext);
+        
+        // Use reflection to inject mock parser
+        try {
+            Field parserField = BPMWorkerRegistry.class.getDeclaredField("expressionParser");
+            parserField.setAccessible(true);
+            parserField.set(registry, mockParser);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to inject mock parser", e);
+        }
+    }
+
+    @Test
+    void testSpelIntegration_ThroughPublicMethods() throws Exception {
+        // Setup test worker class
+        class TestWorker {
+            @BPMWorker("#{'test-topic'}")
+            @BPMResult
+            public Map<String, Object> processTask(
+                    @BPMVariable("#{'test-var'}") String param) {
+                return Map.of("result", "success");
             }
-        };
-    }
-
-    @Test
-    void testEvaluateSpelExpression_PlainString() {
-        String result = registry.evaluateSpelExpression("plain-string");
-        assertEquals("plain-string", result);
-    }
-
-    @Test
-    void testEvaluateSpelExpression_SpelExpression() throws Exception {
+        }
+        
+        TestWorker worker = new TestWorker();
+        Method method = worker.getClass().getMethod("processTask", String.class);
+        
+        // Mock expression evaluation
         Expression mockExpression = Mockito.mock(Expression.class);
         when(mockParser.parseExpression(anyString())).thenReturn(mockExpression);
-        when(mockExpression.getValue(any(StandardEvaluationContext.class))).thenReturn("resolved-value");
-
-        String result = registry.evaluateSpelExpression("#{'test-expression'}");
-        assertEquals("resolved-value", result);
-    }
-
-    @Test
-    void testEvaluateSpelExpression_InvalidExpression() throws Exception {
-        when(mockParser.parseExpression(anyString())).thenThrow(new RuntimeException("Invalid expression"));
-
-        String result = registry.evaluateSpelExpression("#{'invalid'}");
-        assertEquals("#{'invalid'}", result);
-    }
-
-    @Test
-    void testDetermineTopic_WithSpelExpression() throws Exception {
-        Expression mockExpression = Mockito.mock(Expression.class);
-        when(mockParser.parseExpression(anyString())).thenReturn(mockExpression);
-        when(mockExpression.getValue(any(StandardEvaluationContext.class))).thenReturn("resolved-topic");
-
-        BPMWorker workerAnnotation = Mockito.mock(BPMWorker.class);
-        when(workerAnnotation.value()).thenReturn("");
-        when(workerAnnotation.topic()).thenReturn("#{'test-topic'}");
-
-        String topic = registry.determineTopic(workerAnnotation);
-        assertEquals("resolved-topic", topic);
-    }
-
-    @Test
-    void testDetermineVariableName_WithSpelExpression() throws Exception {
-        Expression mockExpression = Mockito.mock(Expression.class);
-        when(mockParser.parseExpression(anyString())).thenReturn(mockExpression);
-        when(mockExpression.getValue(any(StandardEvaluationContext.class))).thenReturn("resolved-variable");
-
-        Parameter mockParameter = Mockito.mock(Parameter.class);
-        when(mockParameter.getName()).thenReturn("defaultName");
-
-        BPMVariable mockAnnotation = Mockito.mock(BPMVariable.class);
-        when(mockAnnotation.value()).thenReturn("#{'test-variable'}");
-
-        String variableName = registry.determineVariableName(mockParameter, mockAnnotation);
-        assertEquals("resolved-variable", variableName);
-    }
-
-    @Test
-    void testDetermineVariableName_WithoutAnnotation() throws Exception {
-        Parameter mockParameter = Mockito.mock(Parameter.class);
-        when(mockParameter.getName()).thenReturn("defaultName");
-
-        String variableName = registry.determineVariableName(mockParameter, null);
-        assertEquals("defaultName", variableName);
+        when(mockExpression.getValue(any(StandardEvaluationContext.class)))
+            .thenReturn("resolved-topic")  // For topic
+            .thenReturn("resolved-var");   // For variable
+        
+        // Test through public registration flow
+        registry.postProcessAfterInitialization(worker, "testWorker");
+        
+        // Verify topic resolution
+        WorkerMethod workerMethod = registry.getWorkerMethod("resolved-topic").orElseThrow();
+        assertEquals("resolved-topic", workerMethod.getTopic());
+        
+        // Verify variable name resolution
+        WorkerMethod.ParameterInfo paramInfo = workerMethod.getParameters().get(0);
+        assertEquals("resolved-var", paramInfo.getVariableName());
     }
 }

@@ -37,6 +37,16 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
     
     private final Map<String, WorkerMethod> workerMethods = new HashMap<>();
     private final ApplicationContext applicationContext;
+    private final ExpressionParser expressionParser;
+    
+    public BPMWorkerRegistry(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+        this.expressionParser = createExpressionParser();
+    }
+    
+    protected ExpressionParser createExpressionParser() {
+        return new SpelExpressionParser();
+    }
     
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -109,21 +119,18 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
         return parameter.getName();
     }
 
-    private String evaluateSpelExpression(String expression) {
+    String evaluateSpelExpression(String expression) {
         if (!StringUtils.hasText(expression)) {
             return expression;
         }
 
-        // Simple regex to match #{...} expressions
         if (expression.matches(".*#\\{.+\\}.*")) {
             try {
-                ExpressionParser parser = new SpelExpressionParser();
                 StandardEvaluationContext context = new StandardEvaluationContext();
                 context.setBeanResolver(new BeanFactoryResolver(applicationContext));
                 
-                // Extract just the expression content between #{ and }
                 String spelContent = expression.replaceAll(".*#\\{(.+)\\}.*", "$1");
-                Expression exp = parser.parseExpression(spelContent);
+                Expression exp = expressionParser.parseExpression(spelContent);
                 Object result = exp.getValue(context);
                 return result != null ? result.toString() : expression;
             } catch (Exception e) {
