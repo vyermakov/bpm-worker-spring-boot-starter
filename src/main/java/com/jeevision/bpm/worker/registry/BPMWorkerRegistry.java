@@ -110,38 +110,27 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
     }
 
     private String evaluateSpelExpression(String expression) {
-        if (!StringUtils.hasText(expression) || !expression.contains("#{")) {
+        if (!StringUtils.hasText(expression)) {
             return expression;
         }
 
-        try {
-            ExpressionParser parser = new SpelExpressionParser();
-            StandardEvaluationContext context = new StandardEvaluationContext();
-            context.setBeanResolver(new BeanFactoryResolver(applicationContext));
-            
-            Expression exp = parser.parseExpression(expression, new TemplateParserContext());
-            return exp.getValue(context, String.class);
-        } catch (Exception e) {
-            log.warn("Failed to evaluate SpEL expression '{}': {}", expression, e.getMessage());
-            return expression;
+        // Simple regex to match #{...} expressions
+        if (expression.matches(".*#\\{.+\\}.*")) {
+            try {
+                ExpressionParser parser = new SpelExpressionParser();
+                StandardEvaluationContext context = new StandardEvaluationContext();
+                context.setBeanResolver(new BeanFactoryResolver(applicationContext));
+                
+                // Extract just the expression content between #{ and }
+                String spelContent = expression.replaceAll(".*#\\{(.+)\\}.*", "$1");
+                Expression exp = parser.parseExpression(spelContent);
+                Object result = exp.getValue(context);
+                return result != null ? result.toString() : expression;
+            } catch (Exception e) {
+                log.warn("Failed to evaluate SpEL expression '{}': {}", expression, e.getMessage());
+            }
         }
-    }
-
-    private static class TemplateParserContext implements org.springframework.expression.ParserContext {
-        @Override
-        public String getExpressionPrefix() {
-            return "#{";
-        }
-
-        @Override
-        public String getExpressionSuffix() {
-            return "}";
-        }
-
-        @Override
-        public boolean isTemplate() {
-            return true;
-        }
+        return expression;
     }
     
     public Optional<WorkerMethod> getWorkerMethod(String topic) {
