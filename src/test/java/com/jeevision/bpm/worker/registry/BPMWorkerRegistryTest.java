@@ -2,6 +2,7 @@ package com.jeevision.bpm.worker.registry;
 
 import com.jeevision.bpm.worker.annotation.BPMVariable;
 import com.jeevision.bpm.worker.annotation.BPMWorker;
+import com.jeevision.bpm.worker.annotation.BPMResult;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,8 +13,10 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
