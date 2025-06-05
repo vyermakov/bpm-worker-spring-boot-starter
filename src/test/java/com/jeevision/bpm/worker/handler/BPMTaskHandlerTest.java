@@ -117,12 +117,14 @@ class BPMTaskHandlerTest {
         WorkerMethod.ThrowsExceptionInfo throwsInfo = WorkerMethod.ThrowsExceptionInfo.builder()
                 .exceptionType(IllegalArgumentException.class)
                 .bmpErrorAnnotation(bpmError)
+                .errorCode("BUSINESS_ERROR")
+                .errorMessage("Business validation failed")
                 .build();
 
         when(workerMethod.getBean()).thenReturn(mockBean);
         when(workerMethod.getMethod()).thenReturn(mockMethod);
         when(workerMethod.getParameters()).thenReturn(List.of(paramInfo));
-        when(workerMethod.getThrowsExceptions()).thenReturn(List.of(throwsInfo));
+        when(workerMethod.getThrowsExceptionMappings()).thenReturn(Map.of(IllegalArgumentException.class, throwsInfo));
         when(workerMethod.getResultAnnotation()).thenReturn(null);
 
         taskHandler = taskHandler.withWorkerMethod(workerMethod);
@@ -161,7 +163,7 @@ class BPMTaskHandlerTest {
         when(workerMethod.getBean()).thenReturn(mockBean);
         when(workerMethod.getMethod()).thenReturn(mockMethod);
         when(workerMethod.getParameters()).thenReturn(List.of(paramInfo));
-        when(workerMethod.getThrowsExceptions()).thenReturn(List.of());
+        when(workerMethod.getThrowsExceptionMappings()).thenReturn(Map.of());
         when(workerMethod.getResultAnnotation()).thenReturn(null);
 
         taskHandler = taskHandler.withWorkerMethod(workerMethod);

@@ -205,7 +205,11 @@ public class BPMTaskHandler implements ExternalTaskHandler {
     
     private Map<String, Object> handleNullResult(BPMResult resultAnnotation) {
         return switch (resultAnnotation.nullHandling()) {
-            case SET_NULL -> Map.of(resultAnnotation.name(), (Object) null);
+            case SET_NULL -> {
+                Map<String, Object> result = new HashMap<>();
+                result.put(resultAnnotation.name(), null);
+                yield result;
+            }
             case SKIP -> Map.of();
             case THROW_EXCEPTION -> throw new IllegalStateException("Method returned null but null handling is set to THROW_EXCEPTION");
         };

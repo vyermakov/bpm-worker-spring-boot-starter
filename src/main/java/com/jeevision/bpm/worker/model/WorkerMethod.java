@@ -28,6 +28,7 @@ public class WorkerMethod {
     private List<ParameterInfo> parameters;
     private String topic;
     private Map<Class<? extends Throwable>, ThrowsExceptionInfo> throwsExceptionMappings;
+    private List<ThrowsExceptionInfo> throwsExceptions;
     
     @Data
     @Builder
