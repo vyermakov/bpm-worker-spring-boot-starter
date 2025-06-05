@@ -73,7 +73,7 @@ class BPMTaskHandlerTest {
         when(externalTask.getAllVariables()).thenReturn(Map.of("param1", "value1"));
         when(externalTask.getId()).thenReturn("task123");
         when(externalTask.getTopicName()).thenReturn("testTopic");
-        when(objectMapper.convertValue(any(), any())).thenReturn(Map.of("resultKey", "resultValue"));
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(Map.of("resultKey", "resultValue"));
 
         // Execute
         taskHandler.execute(externalTask, externalTaskService);
