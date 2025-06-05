@@ -82,7 +82,9 @@ class BPMTaskHandlerTest {
         // Verify
         verify(externalTaskService).complete(
             eq(externalTask), 
-            argThat(vars -> vars.containsKey("resultKey") && "resultValue".equals(vars.get("resultKey")))
+            argThat(vars -> vars.containsKey("result") 
+                && ((Map<?,?>)vars.get("result")).containsKey("resultKey")
+                && "resultValue".equals(((Map<?,?>)vars.get("result")).get("resultKey")))
         );
     }
 
@@ -132,27 +134,29 @@ class BPMTaskHandlerTest {
     // Helper methods to create test worker methods
     private WorkerMethod createWorkerMethod() throws Exception {
         Method method = TestWorker.class.getMethod("processTask", String.class);
+        BPMWorker workerAnnotation = mock(BPMWorker.class);
+        when(workerAnnotation.topic()).thenReturn("testTopic");
+        
         return WorkerMethod.builder()
                 .bean(testWorker)
                 .method(method)
+                .workerAnnotation(workerAnnotation)
                 .parameters(createParameterInfos(method))
                 .throwsExceptionMappings(new HashMap<>())
+                .topic("testTopic")
                 .build();
     }
 
     private List<WorkerMethod.ParameterInfo> createParameterInfos(Method method) throws Exception {
         Parameter param = method.getParameters()[0];
-        BPMVariable varAnnotation = mock(BPMVariable.class);
-        when(varAnnotation.value()).thenReturn("param1");
-        when(varAnnotation.required()).thenReturn(false);
-        when(varAnnotation.defaultValue()).thenReturn("");
+        BPMVariable varAnnotation = param.getAnnotation(BPMVariable.class);
         
         return List.of(WorkerMethod.ParameterInfo.builder()
                 .parameter(param)
                 .variableName("param1")
                 .type(String.class)
-                .required(false)
-                .defaultValue("")
+                .required(varAnnotation != null && varAnnotation.required())
+                .defaultValue(varAnnotation != null ? varAnnotation.defaultValue() : "")
                 .variableAnnotation(varAnnotation)
                 .build());
     }
