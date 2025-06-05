@@ -79,8 +79,10 @@ class BPMTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Verify
-        verify(externalTaskService).complete(eq(externalTask), 
-            argThat(vars -> vars.containsKey("resultKey") && "resultValue".equals(vars.get("resultKey")));
+        verify(externalTaskService).complete(
+            eq(externalTask), 
+            argThat(vars -> vars.containsKey("resultKey") && "resultValue".equals(vars.get("resultKey")))
+        );
     }
 
     @Test
