@@ -38,8 +38,13 @@ class BPMWorkerRegistryTest {
         // Use reflection to inject mock parser
         try {
             Field parserField = BPMWorkerRegistry.class.getDeclaredField("expressionParser");
-            parserField.setAccessible(true);
-            parserField.set(registry, mockParser);
+            boolean wasAccessible = parserField.isAccessible();
+            try {
+                parserField.setAccessible(true);
+                parserField.set(registry, mockParser);
+            } finally {
+                parserField.setAccessible(wasAccessible);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to inject mock parser", e);
         }

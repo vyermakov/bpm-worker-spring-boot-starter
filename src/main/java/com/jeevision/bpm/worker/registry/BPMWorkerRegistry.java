@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class BPMWorkerRegistry implements BeanPostProcessor {
     
-    private final Map<String, WorkerMethod> workerMethods = new HashMap<>();
+    private final Map<String, WorkerMethod> workerMethods = new ConcurrentHashMap<>();
     private final ApplicationContext applicationContext;
     private final ExpressionParser expressionParser;
     
@@ -134,7 +134,8 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
                 Object result = exp.getValue(context);
                 return result != null ? result.toString() : expression;
             } catch (Exception e) {
-                log.warn("Failed to evaluate SpEL expression '{}': {}", expression, e.getMessage());
+                log.error("Failed to evaluate SpEL expression '{}'", expression, e);
+                throw new IllegalArgumentException("Invalid SpEL expression: " + expression, e);
             }
         }
         return expression;
