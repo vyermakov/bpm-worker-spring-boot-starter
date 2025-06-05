@@ -134,7 +134,23 @@ class BPMTaskHandlerTest {
         return WorkerMethod.builder()
                 .bean(testWorker)
                 .method(method)
+                .parameters(createParameterInfos(method))
+                .throwsExceptionMappings(new HashMap<>())
                 .build();
+    }
+
+    private List<WorkerMethod.ParameterInfo> createParameterInfos(Method method) throws Exception {
+        Parameter param = method.getParameters()[0];
+        BPMVariable varAnnotation = param.getAnnotation(BPMVariable.class);
+        
+        return List.of(WorkerMethod.ParameterInfo.builder()
+                .parameter(param)
+                .variableName("param1")
+                .type(String.class)
+                .required(false)
+                .defaultValue("")
+                .variableAnnotation(varAnnotation)
+                .build());
     }
 
     private WorkerMethod createWorkerMethodWithResultAnnotation() throws Exception {
@@ -146,6 +162,8 @@ class BPMTaskHandlerTest {
         return WorkerMethod.builder()
                 .bean(testWorker)
                 .method(method)
+                .parameters(createParameterInfos(method))
+                .throwsExceptionMappings(new HashMap<>())
                 .resultAnnotation(resultAnnotation)
                 .build();
     }
@@ -155,9 +173,17 @@ class BPMTaskHandlerTest {
         BPMError errorAnnotation = mock(BPMError.class);
         when(errorAnnotation.errorCode()).thenReturn("TEST_ERROR");
         
+        Map<Class<?>, WorkerMethod.ThrowsExceptionInfo> exceptionMappings = new HashMap<>();
+        exceptionMappings.put(Exception.class, WorkerMethod.ThrowsExceptionInfo.builder()
+                .errorCode("TEST_ERROR")
+                .errorMessage("Test error")
+                .build());
+        
         return WorkerMethod.builder()
                 .bean(testWorker)
                 .method(method)
+                .parameters(createParameterInfos(method))
+                .throwsExceptionMappings(exceptionMappings)
                 .build();
     }
 
@@ -166,6 +192,8 @@ class BPMTaskHandlerTest {
         return WorkerMethod.builder()
                 .bean(testWorker)
                 .method(method)
+                .parameters(createParameterInfos(method))
+                .throwsExceptionMappings(new HashMap<>())
                 .build();
     }
 
