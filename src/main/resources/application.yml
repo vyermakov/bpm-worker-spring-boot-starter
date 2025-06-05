@@ -1,0 +1,27 @@
+# BPM Worker Configuration Example
+# This file should be placed in: src/main/resources/application.yml
+
+bpm:
+  worker:
+    enabled: true
+    base-url: http://localhost:8080/engine-rest
+    worker-id: my-spring-worker
+    max-tasks: 5
+    async-response-timeout: 10000
+    lock-duration: 30000
+    use-priority: true
+    auth:
+      username: demo
+      password: demo
+      # OR use token-based auth:
+      # token: your-bearer-token
+
+# Standard Spring Boot configuration
+spring:
+  application:
+!!!    n: bpm-worker-example
+  
+logging:
+  level:
+    com.jeevision.bpm.worker: DEBUG
+    org.camunda.bpm.client: INFO
