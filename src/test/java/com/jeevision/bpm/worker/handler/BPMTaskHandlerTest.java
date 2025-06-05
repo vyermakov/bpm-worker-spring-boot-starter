@@ -72,7 +72,6 @@ class BPMTaskHandlerTest {
         BPMResult resultAnnotation = mock(BPMResult.class);
         when(resultAnnotation.name()).thenReturn("output");
         when(resultAnnotation.flatten()).thenReturn(false);
-        when(resultAnnotation.nullHandling()).thenReturn(BPMResult.NullHandling.SKIP);
 
         when(workerMethod.getBean()).thenReturn(mockBean);
         when(workerMethod.getMethod()).thenReturn(mockMethod);
@@ -125,7 +124,6 @@ class BPMTaskHandlerTest {
         when(workerMethod.getMethod()).thenReturn(mockMethod);
         when(workerMethod.getParameters()).thenReturn(List.of(paramInfo));
         when(workerMethod.getThrowsExceptionMappings()).thenReturn(Map.of(IllegalArgumentException.class, throwsInfo));
-        when(workerMethod.getResultAnnotation()).thenReturn(null);
 
         taskHandler = taskHandler.withWorkerMethod(workerMethod);
 
@@ -164,7 +162,6 @@ class BPMTaskHandlerTest {
         when(workerMethod.getMethod()).thenReturn(mockMethod);
         when(workerMethod.getParameters()).thenReturn(List.of(paramInfo));
         when(workerMethod.getThrowsExceptionMappings()).thenReturn(Map.of());
-        when(workerMethod.getResultAnnotation()).thenReturn(null);
 
         taskHandler = taskHandler.withWorkerMethod(workerMethod);
 
