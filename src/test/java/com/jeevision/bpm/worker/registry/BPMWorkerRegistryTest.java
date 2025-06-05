@@ -1,9 +1,14 @@
 package com.jeevision.bpm.worker.registry;
 
-import com.jeevision.bpm.worker.annotation.BPMVariable;
-import com.jeevision.bpm.worker.annotation.BPMWorker;
-import com.jeevision.bpm.worker.annotation.BPMResult;
-import com.jeevision.bpm.worker.model.WorkerMethod;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -13,15 +18,10 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import com.jeevision.bpm.worker.annotation.BPMResult;
+import com.jeevision.bpm.worker.annotation.BPMVariable;
+import com.jeevision.bpm.worker.annotation.BPMWorker;
+import com.jeevision.bpm.worker.model.WorkerMethod;
 
 class BPMWorkerRegistryTest {
 
@@ -58,7 +58,6 @@ class BPMWorkerRegistryTest {
         }
         
         TestWorker worker = new TestWorker();
-        Method method = worker.getClass().getMethod("processTask", String.class);
         
         // Mock expression evaluation
         Expression mockExpression = Mockito.mock(Expression.class);
