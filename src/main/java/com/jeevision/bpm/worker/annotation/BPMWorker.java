@@ -22,11 +22,13 @@ public @interface BPMWorker {
     /**
      * The topic name for the external task worker.
      * This is a shortcut to the 'topic' parameter.
+     * Can be a SpEL expression (e.g. "#{environment.getProperty('bpm.topics.prefix')}-order")
      */
     String value() default "";
     
     /**
      * The topic name for the external task worker.
+     * Can be a SpEL expression (e.g. "#{environment.getProperty('bpm.topics.prefix')}-order")
      */
     String topic() default "";
     

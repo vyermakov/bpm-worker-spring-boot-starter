@@ -9,7 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -73,7 +78,8 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
     }
     
     private String determineTopic(BPMWorker annotation) {
-        return StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.topic();
+        String topic = StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.topic();
+        return evaluateSpelExpression(topic);
     }
     
     private List<WorkerMethod.ParameterInfo> extractParameters(Method method) {
@@ -98,9 +104,44 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
     
     private String determineVariableName(Parameter parameter, BPMVariable annotation) {
         if (annotation != null && StringUtils.hasText(annotation.value())) {
-            return annotation.value();
+            return evaluateSpelExpression(annotation.value());
         }
         return parameter.getName();
+    }
+
+    private String evaluateSpelExpression(String expression) {
+        if (!StringUtils.hasText(expression) || !expression.contains("#{")) {
+            return expression;
+        }
+
+        try {
+            ExpressionParser parser = new SpelExpressionParser();
+            StandardEvaluationContext context = new StandardEvaluationContext();
+            context.setBeanResolver(new BeanFactoryResolver(applicationContext));
+            
+            Expression exp = parser.parseExpression(expression, new TemplateParserContext());
+            return exp.getValue(context, String.class);
+        } catch (Exception e) {
+            log.warn("Failed to evaluate SpEL expression '{}': {}", expression, e.getMessage());
+            return expression;
+        }
+    }
+
+    private static class TemplateParserContext implements org.springframework.expression.ParserContext {
+        @Override
+        public String getExpressionPrefix() {
+            return "#{";
+        }
+
+        @Override
+        public String getExpressionSuffix() {
+            return "}";
+        }
+
+        @Override
+        public boolean isTemplate() {
+            return true;
+        }
     }
     
     public Optional<WorkerMethod> getWorkerMethod(String topic) {

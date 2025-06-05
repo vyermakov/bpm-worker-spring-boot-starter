@@ -19,6 +19,7 @@ public @interface BPMVariable {
     /**
      * The name of the process/task variable.
      * If not specified, the parameter name will be used.
+     * Can be a SpEL expression (e.g. "#{'prefix-' + environment.getProperty('bpm.vars.suffix')}")
      */
     String value() default "";
     
