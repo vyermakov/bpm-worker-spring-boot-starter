@@ -1,9 +1,7 @@
 package com.jeevision.bpm.worker.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.annotation.BPMError;
-import com.jeevision.bpm.worker.annotation.BPMResult;
-import com.jeevision.bpm.worker.annotation.BPMVariable;
+import com.jeevision.bpm.worker.annotation.*;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskService;
@@ -144,7 +142,10 @@ class BPMTaskHandlerTest {
 
     private List<WorkerMethod.ParameterInfo> createParameterInfos(Method method) throws Exception {
         Parameter param = method.getParameters()[0];
-        BPMVariable varAnnotation = param.getAnnotation(BPMVariable.class);
+        BPMVariable varAnnotation = mock(BPMVariable.class);
+        when(varAnnotation.value()).thenReturn("param1");
+        when(varAnnotation.required()).thenReturn(false);
+        when(varAnnotation.defaultValue()).thenReturn("");
         
         return List.of(WorkerMethod.ParameterInfo.builder()
                 .parameter(param)
@@ -176,7 +177,7 @@ class BPMTaskHandlerTest {
         BPMError errorAnnotation = mock(BPMError.class);
         when(errorAnnotation.errorCode()).thenReturn("TEST_ERROR");
         
-        Map<Class<?>, WorkerMethod.ThrowsExceptionInfo> exceptionMappings = new HashMap<>();
+        Map<Class<? extends Throwable>, WorkerMethod.ThrowsExceptionInfo> exceptionMappings = new HashMap<>();
         exceptionMappings.put(Exception.class, WorkerMethod.ThrowsExceptionInfo.builder()
                 .errorCode("TEST_ERROR")
                 .errorMessage("Test error")
@@ -204,23 +205,23 @@ class BPMTaskHandlerTest {
     public static class TestWorker {
         private String lastResult;
 
-        public Map<String, Object> processTask(String param) {
+        public Map<String, Object> processTask(@BPMVariable("param1") String param) {
             lastResult = "processed-" + param;
             return Map.of("result", lastResult);
         }
 
         @BPMResult
-        public Map<String, Object> processTaskWithResult(String param) {
+        public Map<String, Object> processTaskWithResult(@BPMVariable("param1") String param) {
             lastResult = "processed-" + param;
             return Map.of("resultKey", "resultValue");
         }
 
         @BPMError(errorCode = "TEST_ERROR")
-        public Map<String, Object> processTaskThatThrows(String param) throws Exception {
+        public Map<String, Object> processTaskThatThrows(@BPMVariable("param1") String param) throws Exception {
             throw new Exception("Test exception");
         }
 
-        public Map<String, Object> processTaskThatThrowsRuntimeException(String param) {
+        public Map<String, Object> processTaskThatThrowsRuntimeException(@BPMVariable("param1") String param) {
             throw new RuntimeException("Test runtime exception");
         }
 
