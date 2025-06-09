@@ -213,7 +213,7 @@ class ExternalTaskClientConfigurationTest {
             
             // Then
             verify(externalTaskClient, times(2)).subscribe(anyString());
-            verify(workerRegistry).getAllWorkerMethods();
+            verify(workerRegistry, times(2)).getAllWorkerMethods();
         }
     }
 
