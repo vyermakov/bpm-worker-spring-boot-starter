@@ -10,7 +10,7 @@
 	<name>BPM Worker Spring Boot Starter</name>
 	<description>Spring Boot starter for Camunda external task workers with
 		custom annotations</description>
-	<url>https://github.com/jeevision/bpm-worker-spring-boot-starter</url>
+	<url>https://github.com/vyermakov/bpm-worker-spring-boot-starter</url>
 
 	<licenses>
 		<license>
@@ -28,9 +28,9 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:https://github.com/jeevision/bpm-worker-spring-boot-starter.git</connection>
-		<developerConnection>scm:git:https://github.com/jeevision/bpm-worker-spring-boot-starter.git</developerConnection>
-		<url>https://github.com/jeevision/bpm-worker-spring-boot-starter/tree/main</url>
+		<connection>scm:git:https://github.com/vyermakov/bpm-worker-spring-boot-starter.git</connection>
+		<developerConnection>scm:git:https://github.com/vyermakov/bpm-worker-spring-boot-starter.git</developerConnection>
+		<url>https://github.com/vyermakov/bpm-worker-spring-boot-starter/tree/main</url>
 		<tag>HEAD</tag>
 	</scm>
 
