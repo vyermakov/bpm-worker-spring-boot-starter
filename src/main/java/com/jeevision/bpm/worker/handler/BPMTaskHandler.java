@@ -1,22 +1,23 @@
 package com.jeevision.bpm.worker.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.annotation.BPMError;
-import com.jeevision.bpm.worker.annotation.BPMResult;
-import com.jeevision.bpm.worker.model.WorkerMethod;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.camunda.bpm.client.task.ExternalTask;
-import org.camunda.bpm.client.task.ExternalTaskHandler;
-import org.camunda.bpm.client.task.ExternalTaskService;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import org.camunda.bpm.client.task.ExternalTask;
+import org.camunda.bpm.client.task.ExternalTaskHandler;
+import org.camunda.bpm.client.task.ExternalTaskService;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jeevision.bpm.worker.annotation.BPMError;
+import com.jeevision.bpm.worker.annotation.BPMResult;
+import com.jeevision.bpm.worker.model.WorkerMethod;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Handles execution of BPM worker methods.
