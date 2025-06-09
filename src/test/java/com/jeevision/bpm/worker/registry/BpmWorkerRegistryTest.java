@@ -17,14 +17,14 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import com.jeevision.bpm.worker.annotation.BPMResult;
-import com.jeevision.bpm.worker.annotation.BPMVariable;
-import com.jeevision.bpm.worker.annotation.BPMWorker;
+import com.jeevision.bpm.worker.annotation.BpmResult;
+import com.jeevision.bpm.worker.annotation.BpmVariable;
+import com.jeevision.bpm.worker.annotation.BpmWorker;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 
-class BPMWorkerRegistryTest {
+class BpmWorkerRegistryTest {
 
-    private BPMWorkerRegistry registry;
+    private BpmWorkerRegistry registry;
     private ApplicationContext mockContext;
     private ExpressionParser mockParser;
 
@@ -32,11 +32,11 @@ class BPMWorkerRegistryTest {
     void setUp() {
         mockContext = Mockito.mock(ApplicationContext.class);
         mockParser = Mockito.mock(SpelExpressionParser.class);
-        registry = new BPMWorkerRegistry(mockContext);
+        registry = new BpmWorkerRegistry(mockContext);
         
         // Use reflection to inject mock parser
         try {
-            Field parserField = BPMWorkerRegistry.class.getDeclaredField("expressionParser");
+            Field parserField = BpmWorkerRegistry.class.getDeclaredField("expressionParser");
             parserField.setAccessible(true);
             parserField.set(registry, mockParser);
         } catch (Exception e) {
@@ -48,10 +48,10 @@ class BPMWorkerRegistryTest {
     void testSpelIntegration_ThroughPublicMethods() throws Exception {
         // Setup test worker class
         class TestWorker {
-            @BPMWorker("#{'test-topic'}")
-            @BPMResult
+            @BpmWorker("#{'test-topic'}")
+            @BpmResult
             public Map<String, Object> processTask(
-                    @BPMVariable("#{'test-var'}") String param) {
+                    @BpmVariable("#{'test-var'}") String param) {
                 return Map.of("result", "success");
             }
         }

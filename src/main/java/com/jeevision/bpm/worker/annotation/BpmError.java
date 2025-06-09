@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BPMError {
+public @interface BpmError {
     
     String errorCode();
     String errorMessage() default "";

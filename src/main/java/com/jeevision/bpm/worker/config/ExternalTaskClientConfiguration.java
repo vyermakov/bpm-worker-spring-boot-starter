@@ -1,8 +1,8 @@
 package com.jeevision.bpm.worker.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.handler.BPMTaskHandler;
-import com.jeevision.bpm.worker.registry.BPMWorkerRegistry;
+import com.jeevision.bpm.worker.handler.BpmTaskHandler;
+import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.client.ExternalTaskClient;
@@ -23,11 +23,11 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(BPMWorkerProperties.class)
+@EnableConfigurationProperties(BpmWorkerProperties.class)
 public class ExternalTaskClientConfiguration {
     
-    private final BPMWorkerProperties properties;
-    private final BPMWorkerRegistry workerRegistry;
+    private final BpmWorkerProperties properties;
+    private final BpmWorkerRegistry workerRegistry;
     private final ObjectMapper objectMapper;
     
     @Bean
@@ -46,7 +46,7 @@ public class ExternalTaskClientConfiguration {
     }
     
 	private void configureAuthentication(ExternalTaskClientBuilder builder) {
-		BPMWorkerProperties.Authentication auth = properties.getAuth();
+		BpmWorkerProperties.Authentication auth = properties.getAuth();
 
 		if (StringUtils.hasText(auth.getUsername()) && StringUtils.hasText(auth.getPassword())) {
 			builder.addInterceptor(new BasicAuthInterceptor(auth.getUsername(), auth.getPassword()));
@@ -66,7 +66,7 @@ public class ExternalTaskClientConfiguration {
             
             client.subscribe(topic)
                     .lockDuration(workerMethod.getWorkerAnnotation().lockDuration())
-                    .handler(new BPMTaskHandler(objectMapper).withWorkerMethod(workerMethod))
+                    .handler(new BpmTaskHandler(objectMapper).withWorkerMethod(workerMethod))
                     .open();
         });
         

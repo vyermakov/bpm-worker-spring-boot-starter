@@ -38,20 +38,20 @@ import org.mockito.quality.Strictness;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.registry.BPMWorkerRegistry;
+import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ExternalTaskClientConfigurationTest {
 
     @Mock
-    private BPMWorkerProperties properties;
+    private BpmWorkerProperties properties;
     
     @Mock
-    private BPMWorkerProperties.Authentication auth;
+    private BpmWorkerProperties.Authentication auth;
     
     @Mock
-    private BPMWorkerRegistry workerRegistry;
+    private BpmWorkerRegistry workerRegistry;
     
     @Mock
     private ObjectMapper objectMapper;
@@ -176,7 +176,7 @@ class ExternalTaskClientConfigurationTest {
         ));
         when(workerRegistry.getRegisteredTopics()).thenReturn(Set.of("topic1", "topic2"));
         
-        var mockWorkerAnnotation = mock(com.jeevision.bpm.worker.annotation.BPMWorker.class);
+        var mockWorkerAnnotation = mock(com.jeevision.bpm.worker.annotation.BpmWorker.class);
         when(mockWorkerAnnotation.lockDuration()).thenReturn(10000L);
         
         for (var workerMethod : workerRegistry.getAllWorkerMethods().values()) {

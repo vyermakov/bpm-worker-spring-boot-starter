@@ -1,9 +1,9 @@
 package com.jeevision.bpm.worker.model;
 
-import com.jeevision.bpm.worker.annotation.BPMError;
-import com.jeevision.bpm.worker.annotation.BPMResult;
-import com.jeevision.bpm.worker.annotation.BPMVariable;
-import com.jeevision.bpm.worker.annotation.BPMWorker;
+import com.jeevision.bpm.worker.annotation.BpmError;
+import com.jeevision.bpm.worker.annotation.BpmResult;
+import com.jeevision.bpm.worker.annotation.BpmVariable;
+import com.jeevision.bpm.worker.annotation.BpmWorker;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,8 +23,8 @@ import java.util.Map;
 public class WorkerMethod {
     private Object bean;
     private Method method;
-    private BPMWorker workerAnnotation;
-    private BPMResult resultAnnotation;
+    private BpmWorker workerAnnotation;
+    private BpmResult resultAnnotation;
     private List<ParameterInfo> parameters;
     private String topic;
     private Map<Class<? extends Throwable>, ThrowsExceptionInfo> throwsExceptionMappings;
@@ -34,7 +34,7 @@ public class WorkerMethod {
     @Builder
     public static class ParameterInfo {
         private Parameter parameter;
-        private BPMVariable variableAnnotation;
+        private BpmVariable variableAnnotation;
         private String variableName;
         private boolean required;
         private String defaultValue;
@@ -45,7 +45,7 @@ public class WorkerMethod {
     @Builder
     public static class ThrowsExceptionInfo {
         private Class<? extends Throwable> exceptionType;
-        private BPMError bmpErrorAnnotation;
+        private BpmError bmpErrorAnnotation;
         private String errorCode;
         private String errorMessage;
     }

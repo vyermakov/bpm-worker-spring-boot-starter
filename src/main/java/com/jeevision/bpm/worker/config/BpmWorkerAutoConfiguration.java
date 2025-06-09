@@ -1,8 +1,5 @@
 package com.jeevision.bpm.worker.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.handler.BPMTaskHandler;
-import com.jeevision.bpm.worker.registry.BPMWorkerRegistry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,6 +10,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jeevision.bpm.worker.handler.BpmTaskHandler;
+import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
+
 /**
  * Auto-configuration for BPM Worker Spring Boot Starter.
  *
@@ -22,14 +23,14 @@ import org.springframework.context.annotation.Import;
 @AutoConfiguration(after = JacksonAutoConfiguration.class)
 @ConditionalOnClass(name = "org.camunda.bpm.client.ExternalTaskClient")
 @ConditionalOnProperty(prefix = "bpm.worker", name = "enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(BPMWorkerProperties.class)
+@EnableConfigurationProperties(BpmWorkerProperties.class)
 @Import({ExternalTaskClientConfiguration.class})
-public class BPMWorkerAutoConfiguration {
+public class BpmWorkerAutoConfiguration {
     
     @Bean
     @ConditionalOnMissingBean
-    public BPMWorkerRegistry bpmWorkerRegistry(ApplicationContext applicationContext) {
-        return new BPMWorkerRegistry(applicationContext);
+    public BpmWorkerRegistry bpmWorkerRegistry(ApplicationContext applicationContext) {
+        return new BpmWorkerRegistry(applicationContext);
     }
     
     @Bean
@@ -40,7 +41,7 @@ public class BPMWorkerAutoConfiguration {
     
     @Bean
     @ConditionalOnMissingBean
-    public BPMTaskHandler bmpTaskHandler(ObjectMapper objectMapper) {
-        return new BPMTaskHandler(objectMapper);
+    public BpmTaskHandler bmpTaskHandler(ObjectMapper objectMapper) {
+        return new BpmTaskHandler(objectMapper);
     }
 }

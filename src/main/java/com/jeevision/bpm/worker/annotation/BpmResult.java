@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BPMResult {
+public @interface BpmResult {
     
     String name() default "result";
     boolean flatten() default false;

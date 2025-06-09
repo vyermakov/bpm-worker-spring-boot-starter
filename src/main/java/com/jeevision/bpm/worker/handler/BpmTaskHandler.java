@@ -12,8 +12,8 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.annotation.BPMError;
-import com.jeevision.bpm.worker.annotation.BPMResult;
+import com.jeevision.bpm.worker.annotation.BpmError;
+import com.jeevision.bpm.worker.annotation.BpmResult;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 
 import lombok.RequiredArgsConstructor;
@@ -28,12 +28,12 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class BPMTaskHandler implements ExternalTaskHandler {
+public class BpmTaskHandler implements ExternalTaskHandler {
     
     private final ObjectMapper objectMapper;
     private WorkerMethod workerMethod;
     
-    public BPMTaskHandler withWorkerMethod(WorkerMethod workerMethod) {
+    public BpmTaskHandler withWorkerMethod(WorkerMethod workerMethod) {
         this.workerMethod = workerMethod;
         return this;
     }
@@ -74,7 +74,7 @@ public class BPMTaskHandler implements ExternalTaskHandler {
             return;
         }
         
-        var errorAnnotation = AnnotatedElementUtils.findMergedAnnotation(actualException.getClass(), BPMError.class);
+        var errorAnnotation = AnnotatedElementUtils.findMergedAnnotation(actualException.getClass(), BpmError.class);
         if (errorAnnotation != null) {
             var errorCode = errorAnnotation.errorCode();
             var errorMessage = StringUtils.hasText(errorAnnotation.errorMessage()) 
@@ -84,7 +84,7 @@ public class BPMTaskHandler implements ExternalTaskHandler {
             return;
         }
         
-        var methodErrorAnnotation = AnnotatedElementUtils.findMergedAnnotation(workerMethod.getMethod(), BPMError.class);
+        var methodErrorAnnotation = AnnotatedElementUtils.findMergedAnnotation(workerMethod.getMethod(), BpmError.class);
         if (methodErrorAnnotation != null) {
             var errorMapping = findErrorMapping(methodErrorAnnotation, actualException);
             if (errorMapping.isPresent()) {
@@ -108,7 +108,7 @@ public class BPMTaskHandler implements ExternalTaskHandler {
         handleTechnicalFailure(externalTask, externalTaskService, actualException);
     }
     
-    private Optional<BPMError.ErrorMapping> findErrorMapping(BPMError bmpErrorAnnotation, Throwable exception) {
+    private Optional<BpmError.ErrorMapping> findErrorMapping(BpmError bmpErrorAnnotation, Throwable exception) {
         return Arrays.stream(bmpErrorAnnotation.errorMappings())
                 .filter(mapping -> mapping.exception().isAssignableFrom(exception.getClass()))
                 .findFirst();
@@ -196,7 +196,7 @@ public class BPMTaskHandler implements ExternalTaskHandler {
         return Map.of(resultAnnotation.name(), result);
     }
     
-    private Map<String, Object> handleNullResult(BPMResult resultAnnotation) {
+    private Map<String, Object> handleNullResult(BpmResult resultAnnotation) {
         return switch (resultAnnotation.nullHandling()) {
             case SET_NULL -> {
                 Map<String, Object> result = new HashMap<>();
@@ -208,7 +208,7 @@ public class BPMTaskHandler implements ExternalTaskHandler {
         };
     }
     
-    private Map<String, Object> flattenResult(Object result, BPMResult resultAnnotation) {
+    private Map<String, Object> flattenResult(Object result, BpmResult resultAnnotation) {
         try {
             @SuppressWarnings("unchecked")
             var resultMap = (Map<String, Object>) objectMapper.convertValue(result, Map.class);

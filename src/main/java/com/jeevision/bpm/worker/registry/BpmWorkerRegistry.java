@@ -1,8 +1,8 @@
 package com.jeevision.bpm.worker.registry;
 
-import com.jeevision.bpm.worker.annotation.BPMResult;
-import com.jeevision.bpm.worker.annotation.BPMVariable;
-import com.jeevision.bpm.worker.annotation.BPMWorker;
+import com.jeevision.bpm.worker.annotation.BpmResult;
+import com.jeevision.bpm.worker.annotation.BpmVariable;
+import com.jeevision.bpm.worker.annotation.BpmWorker;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +34,13 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BPMWorkerRegistry implements BeanPostProcessor {
+public class BpmWorkerRegistry implements BeanPostProcessor {
     
     private final Map<String, WorkerMethod> workerMethods = new ConcurrentHashMap<>();
     private final ApplicationContext applicationContext;
     private final ExpressionParser expressionParser;
     
-    public BPMWorkerRegistry(ApplicationContext applicationContext) {
+    public BpmWorkerRegistry(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         this.expressionParser = createExpressionParser();
     }
@@ -54,14 +54,14 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
         Class<?> beanClass = bean.getClass();
         
         Stream.of(beanClass.getDeclaredMethods())
-                .filter(method -> AnnotatedElementUtils.hasAnnotation(method, BPMWorker.class))
+                .filter(method -> AnnotatedElementUtils.hasAnnotation(method, BpmWorker.class))
                 .forEach(method -> registerWorkerMethod(bean, method));
         
         return bean;
     }
     
     private void registerWorkerMethod(Object bean, Method method) {
-        BPMWorker workerAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, BPMWorker.class);
+        BpmWorker workerAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, BpmWorker.class);
         if (workerAnnotation == null) {
             return;
         }
@@ -73,7 +73,7 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
         }
         
         List<WorkerMethod.ParameterInfo> parameters = extractParameters(method);
-        BPMResult resultAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, BPMResult.class);
+        BpmResult resultAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, BpmResult.class);
         
         WorkerMethod workerMethod = WorkerMethod.builder()
                 .bean(bean)
@@ -88,7 +88,7 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
         log.info("Registered BPM worker for topic '{}' -> {}.{}", topic, bean.getClass().getSimpleName(), method.getName());
     }
     
-    private String determineTopic(BPMWorker annotation) {
+    private String determineTopic(BpmWorker annotation) {
         String topic = StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.topic();
         return evaluateSpelExpression(topic);
     }
@@ -100,7 +100,7 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
     }
     
     private WorkerMethod.ParameterInfo createParameterInfo(Parameter parameter) {
-        BPMVariable variableAnnotation = parameter.getAnnotation(BPMVariable.class);
+        BpmVariable variableAnnotation = parameter.getAnnotation(BpmVariable.class);
         String variableName = determineVariableName(parameter, variableAnnotation);
         
         return WorkerMethod.ParameterInfo.builder()
@@ -113,7 +113,7 @@ public class BPMWorkerRegistry implements BeanPostProcessor {
                 .build();
     }
     
-    private String determineVariableName(Parameter parameter, BPMVariable annotation) {
+    private String determineVariableName(Parameter parameter, BpmVariable annotation) {
         if (annotation != null && StringUtils.hasText(annotation.value())) {
             return evaluateSpelExpression(annotation.value());
         }

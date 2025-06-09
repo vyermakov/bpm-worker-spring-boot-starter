@@ -25,13 +25,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.annotation.BPMError;
-import com.jeevision.bpm.worker.annotation.BPMResult;
-import com.jeevision.bpm.worker.annotation.BPMVariable;
+import com.jeevision.bpm.worker.annotation.BpmError;
+import com.jeevision.bpm.worker.annotation.BpmResult;
+import com.jeevision.bpm.worker.annotation.BpmVariable;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 
 @ExtendWith(MockitoExtension.class)
-class BPMTaskHandlerTest {
+class BpmTaskHandlerTest {
 
     @Mock
     private ObjectMapper objectMapper;
@@ -45,11 +45,11 @@ class BPMTaskHandlerTest {
     @Mock
     private WorkerMethod workerMethod;
 
-    private BPMTaskHandler taskHandler;
+    private BpmTaskHandler taskHandler;
 
     @BeforeEach
     void setUp() {
-        taskHandler = new BPMTaskHandler(objectMapper);
+        taskHandler = new BpmTaskHandler(objectMapper);
     }
 
     @Test
@@ -75,7 +75,7 @@ class BPMTaskHandlerTest {
                 .defaultValue("")
                 .build();
 
-        BPMResult resultAnnotation = mock(BPMResult.class);
+        BpmResult resultAnnotation = mock(BpmResult.class);
         when(resultAnnotation.name()).thenReturn("output");
         when(resultAnnotation.flatten()).thenReturn(false);
 
@@ -117,7 +117,7 @@ class BPMTaskHandlerTest {
                 .defaultValue("")
                 .build();
 
-        BPMError bpmError = mockMethod.getAnnotation(BPMError.class);
+        BpmError bpmError = mockMethod.getAnnotation(BpmError.class);
         
         WorkerMethod.ThrowsExceptionInfo throwsInfo = WorkerMethod.ThrowsExceptionInfo.builder()
                 .exceptionType(IllegalArgumentException.class)
@@ -246,9 +246,9 @@ class BPMTaskHandlerTest {
                 .defaultValue("")
                 .build();
 
-        BPMResult resultAnnotation = mock(BPMResult.class);
+        BpmResult resultAnnotation = mock(BpmResult.class);
         when(resultAnnotation.name()).thenReturn("output");
-        when(resultAnnotation.nullHandling()).thenReturn(BPMResult.NullHandling.SET_NULL);
+        when(resultAnnotation.nullHandling()).thenReturn(BpmResult.NullHandling.SET_NULL);
 
         when(workerMethod.getBean()).thenReturn(mockBean);
         when(workerMethod.getMethod()).thenReturn(mockMethod);
@@ -287,7 +287,7 @@ class BPMTaskHandlerTest {
                 .defaultValue("")
                 .build();
 
-        BPMResult resultAnnotation = mock(BPMResult.class);
+        BpmResult resultAnnotation = mock(BpmResult.class);
         when(resultAnnotation.flatten()).thenReturn(true);
         when(resultAnnotation.includeNullProperties()).thenReturn(false);
 
@@ -350,16 +350,16 @@ class BPMTaskHandlerTest {
 
     // Test worker classes
     public static class TestWorker {
-        public String processTask(@BPMVariable("input") String input) {
+        public String processTask(@BpmVariable("input") String input) {
             return "processed: " + input;
         }
     }
 
     public static class TestWorkerWithError {
-        @BPMError(errorCode = "DEFAULT_ERROR", errorMappings = {
-            @BPMError.ErrorMapping(exception = IllegalArgumentException.class, errorCode = "BUSINESS_ERROR", errorMessage = "Business validation failed")
+        @BpmError(errorCode = "DEFAULT_ERROR", errorMappings = {
+            @BpmError.ErrorMapping(exception = IllegalArgumentException.class, errorCode = "BUSINESS_ERROR", errorMessage = "Business validation failed")
         })
-        public String processTaskWithError(@BPMVariable("input") String input) {
+        public String processTaskWithError(@BpmVariable("input") String input) {
             if ("error-trigger".equals(input)) {
                 throw new IllegalArgumentException("Business validation failed");
             }
@@ -368,7 +368,7 @@ class BPMTaskHandlerTest {
     }
 
     public static class TestWorkerWithRuntimeError {
-        public String processTaskWithRuntimeError(@BPMVariable("input") String input) {
+        public String processTaskWithRuntimeError(@BpmVariable("input") String input) {
             if ("runtime-error".equals(input)) {
                 throw new RuntimeException("Runtime error occurred");
             }
@@ -377,19 +377,19 @@ class BPMTaskHandlerTest {
     }
 
     public static class TestWorkerWithExternalTask {
-        public String processTaskWithExternalTask(ExternalTask externalTask, @BPMVariable("input") String input) {
+        public String processTaskWithExternalTask(ExternalTask externalTask, @BpmVariable("input") String input) {
             return "processed: " + input + " for task: " + externalTask.getId();
         }
     }
 
     public static class TestWorkerWithNullResult {
-        public String processTaskWithNullResult(@BPMVariable("input") String input) {
+        public String processTaskWithNullResult(@BpmVariable("input") String input) {
             return null;
         }
     }
 
     public static class TestWorkerWithFlattenedResult {
-        public Map<String, Object> processTaskWithFlattenedResult(@BPMVariable("input") String input) {
+        public Map<String, Object> processTaskWithFlattenedResult(@BpmVariable("input") String input) {
             Map<String, Object> result = new HashMap<>();
             result.put("key1", "value1");
             result.put("key2", "value2");
@@ -398,7 +398,7 @@ class BPMTaskHandlerTest {
     }
 
     public static class TestWorkerWithTypeConversion {
-        public String processTaskWithTypeConversion(@BPMVariable("numberInput") Integer number) {
+        public String processTaskWithTypeConversion(@BpmVariable("numberInput") Integer number) {
             return "processed number: " + number;
         }
     }

@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BPMVariable {
+public @interface BpmVariable {
     
     String value() default "";
     boolean required() default false;

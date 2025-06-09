@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface BPMWorker {
+public @interface BpmWorker {
     
     String value() default "";
     String topic() default "";

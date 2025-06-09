@@ -1,13 +1,13 @@
 # BPM Worker Spring Boot Starter
 
-> **Developer's Teaser:** Turn any Spring method into a Camunda worker with just one annotation!
+> **Developer's Teaser:** Turn any Spring method into a Camunda or CIB Sevent worker with just one annotation!
 
 ```java
-@BPMWorker("process-payment")
-@BPMResult(flatten = true, flattenPrefix = "payment_")
-public PaymentResult processPayment(@BPMVariable("amount") Double amount,
-                                   @BPMVariable("customerId") String customerId) 
-        throws @BPMError(errorCode = "INSUFFICIENT_FUNDS") PaymentException {
+@BpmWorker("process-payment")
+@BpmResult(flatten = true, flattenPrefix = "payment_")
+public PaymentResult processPayment(@BpmVariable("amount") Double amount,
+                                   @BpmVariable("customerId") String customerId) 
+        throws @BpmError(errorCode = "INSUFFICIENT_FUNDS") PaymentException {
     
     // Your business logic here
     return new PaymentResult(generateId(), amount, "SUCCESS");
@@ -53,10 +53,10 @@ bpm:
 @Service
 public class OrderService {
     
-    @BPMWorker("process-order")
-    @BPMResult(name = "orderId")
-    public String processOrder(@BPMVariable("customerEmail") String email,
-                              @BPMVariable("items") List<OrderItem> items) {
+    @BpmWorker("process-order")
+    @BpmResult(name = "orderId")
+    public String processOrder(@BpmVariable("customerEmail") String email,
+                              @BpmVariable("items") List<OrderItem> items) {
         // Your business logic
         return "ORDER_" + System.currentTimeMillis();
     }
@@ -65,47 +65,47 @@ public class OrderService {
 
 ## Core Annotations
 
-### `@BPMWorker`
+### `@BpmWorker`
 Marks a method as a Camunda external task worker
 ```java
-@BPMWorker("my-topic")           // Simple
-@BPMWorker(value = "my-topic",   // Advanced
+@BpmWorker("my-topic")           // Simple
+@BpmWorker(value = "my-topic",   // Advanced
            fetchSize = 5, 
            lockDuration = 60000)
 ```
 
-### `@BPMVariable`
+### `@BpmVariable`
 Injects process variables into method parameters
 ```java
-@BPMVariable("customerName")                    // Named variable
-@BPMVariable                                    // Uses parameter name
-@BPMVariable(value = "optional", 
+@BpmVariable("customerName")                    // Named variable
+@BpmVariable                                    // Uses parameter name
+@BpmVariable(value = "optional", 
              required = false, 
              defaultValue = "N/A")             // With defaults
 ```
 
-### `@BPMResult`
+### `@BpmResult`
 Sets method return value as process variables
 ```java
-@BPMResult(name = "result")                     // Simple
-@BPMResult(flatten = true,                      // Flatten object
+@BpmResult(name = "result")                     // Simple
+@BpmResult(flatten = true,                      // Flatten object
            flattenPrefix = "order_")
-@BPMResult(nullHandling = NullHandling.SKIP)    // Null handling
+@BpmResult(nullHandling = NullHandling.SKIP)    // Null handling
 ```
 
-### `@BPMError`
+### `@BpmError`
 Maps exceptions to BPMN errors
 ```java
 // In throws clause (preferred)
-throws @BPMError(errorCode = "VALIDATION_FAILED") ValidationException
+throws @BpmError(errorCode = "VALIDATION_FAILED") ValidationException
 
 // On exception class
-@BPMError(errorCode = "INSUFFICIENT_FUNDS")
+@BpmError(errorCode = "INSUFFICIENT_FUNDS")
 public class InsufficientFundsException extends Exception { }
 
 // Method-level mappings
-@BPMError(errorMappings = {
-    @BPMError.ErrorMapping(exception = IllegalArgumentException.class, 
+@BpmError(errorMappings = {
+    @BpmError.ErrorMapping(exception = IllegalArgumentException.class, 
                           errorCode = "INVALID_INPUT")
 })
 ```
@@ -118,9 +118,9 @@ The library automatically distinguishes between:
 - **Technical Failures** (system issues) - Create incidents, retryable with backoff
 
 ```java
-@BPMWorker("validate-payment")
-public String validatePayment(@BPMVariable("amount") Double amount) 
-        throws @BPMError(errorCode = "INVALID_AMOUNT") IllegalArgumentException {
+@BpmWorker("validate-payment")
+public String validatePayment(@BpmVariable("amount") Double amount) 
+        throws @BpmError(errorCode = "INVALID_AMOUNT") IllegalArgumentException {
     
     if (amount <= 0) {
         throw new IllegalArgumentException("Amount must be positive"); // → BPMN Error
@@ -140,9 +140,9 @@ public String validatePayment(@BPMVariable("amount") Double amount)
 ```java
 public record OrderResult(String orderId, Double total, String status) {}
 
-@BPMWorker("calculate-order")
-@BPMResult(flatten = true, flattenPrefix = "order_")
-public OrderResult calculateOrder(@BPMVariable("items") List<Item> items) {
+@BpmWorker("calculate-order")
+@BpmResult(flatten = true, flattenPrefix = "order_")
+public OrderResult calculateOrder(@BpmVariable("items") List<Item> items) {
     return new OrderResult("ORD123", 99.50, "CONFIRMED");
     // Creates: order_orderId, order_total, order_status
 }
@@ -150,8 +150,8 @@ public OrderResult calculateOrder(@BPMVariable("items") List<Item> items) {
 
 ### Complex Data Processing
 ```java
-@BPMWorker("process-customer-data")
-public String processCustomer(@BPMVariable Map<String, Object> customerData,
+@BpmWorker("process-customer-data")
+public String processCustomer(@BpmVariable Map<String, Object> customerData,
                             ExternalTask task) {
     var customerId = (String) customerData.get("id");
     var email = (String) customerData.get("email");
@@ -166,10 +166,10 @@ public String processCustomer(@BPMVariable Map<String, Object> customerData,
 
 ### Error Inheritance
 ```java
-@BPMWorker("handle-business-logic")
-public String handleLogic(@BPMVariable("type") String type) 
-        throws @BPMError(errorCode = "VALIDATION_ERROR") ValidationException,
-               @BPMError(errorCode = "BUSINESS_RULE_ERROR") BusinessException {
+@BpmWorker("handle-business-logic")
+public String handleLogic(@BpmVariable("type") String type) 
+        throws @BpmError(errorCode = "VALIDATION_ERROR") ValidationException,
+               @BpmError(errorCode = "BUSINESS_RULE_ERROR") BusinessException {
     
     return switch (type) {
         case "VALIDATE" -> throw new ValidationException("Failed validation");
@@ -197,7 +197,7 @@ public String handleLogic(@BPMVariable("type") String type)
 
 - **Java 17+**
 - **Spring Boot 3.x**  
-- **Camunda 7.23+**
+- **Camunda 7.23+** or **CIB Seven 1.0+**
 
 ## Author
 
@@ -205,4 +205,4 @@ public String handleLogic(@BPMVariable("type") String type)
 
 ---
 
-*Build powerful Camunda integrations with minimal code!*
+*Build powerful Camunda / CIB Seven integrations with minimal code!*
