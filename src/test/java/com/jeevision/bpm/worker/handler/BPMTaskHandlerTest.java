@@ -90,7 +90,7 @@ class BPMTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).complete(eq(externalTask), any(Map.class));
+        verify(externalTaskService).complete(eq(externalTask), any());
         verify(externalTaskService, never()).handleBpmnError(any(ExternalTask.class), any(), any(), any());
         verify(externalTaskService, never()).handleFailure(any(ExternalTask.class), any(), any(), anyInt(), anyLong());
     }
@@ -137,7 +137,7 @@ class BPMTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).handleBpmnError(eq(externalTask), eq("BUSINESS_ERROR"), eq("Business validation failed"), any(Map.class));
+        verify(externalTaskService).handleBpmnError(eq(externalTask), eq("BUSINESS_ERROR"), eq("Business validation failed"), any());
         verify(externalTaskService, never()).complete(any(), any());
         verify(externalTaskService, never()).handleFailure(any(ExternalTask.class), any(), any(), anyInt(), anyLong());
     }
@@ -221,7 +221,7 @@ class BPMTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).complete(eq(externalTask), any(Map.class));
+        verify(externalTaskService).complete(eq(externalTask), any());
     }
 
     @Test
@@ -292,7 +292,7 @@ class BPMTaskHandlerTest {
         when(resultAnnotation.includeNullProperties()).thenReturn(false);
 
         Map<String, Object> flattenedMap = Map.of("key1", "value1", "key2", "value2");
-        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(flattenedMap);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn((Map) flattenedMap);
 
         when(workerMethod.getBean()).thenReturn(mockBean);
         when(workerMethod.getMethod()).thenReturn(mockMethod);
@@ -344,7 +344,7 @@ class BPMTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).complete(eq(externalTask), any(Map.class));
+        verify(externalTaskService).complete(eq(externalTask), any());
         verify(objectMapper).convertValue("123", Integer.class);
     }
 
