@@ -28,11 +28,11 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git://github.com/jeevision/bpm-worker-spring-boot-starter.git</connection>
-		<developerConnection>scm:git:ssh://github.com:jeevision/bpm-worker-spring-boot-starter.git</developerConnection>
+		<connection>scm:git:https://github.com/jeevision/bpm-worker-spring-boot-starter.git</connection>
+		<developerConnection>scm:git:https://github.com/jeevision/bpm-worker-spring-boot-starter.git</developerConnection>
 		<url>https://github.com/jeevision/bpm-worker-spring-boot-starter/tree/main</url>
-	  <tag>v1.0.0</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<distributionManagement>
 		<snapshotRepository>
