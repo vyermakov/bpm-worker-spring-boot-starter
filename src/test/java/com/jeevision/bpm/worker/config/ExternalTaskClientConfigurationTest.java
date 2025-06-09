@@ -157,20 +157,41 @@ class ExternalTaskClientConfigurationTest {
     @Test
     void testSubscribeToTopics() throws Exception {
         // Given
-        Set<String> topics = Set.of("topic1", "topic2");
-        when(workerRegistry.getRegisteredTopics()).thenReturn(topics);
+        when(workerRegistry.getAllWorkerMethods()).thenReturn(Map.of(
+            "topic1", mock(com.jeevision.bpm.worker.model.WorkerMethod.class),
+            "topic2", mock(com.jeevision.bpm.worker.model.WorkerMethod.class)
+        ));
+        when(workerRegistry.getRegisteredTopics()).thenReturn(Set.of("topic1", "topic2"));
         
-        // Use reflection to set the private client field
-        Field field = ExternalTaskClientConfiguration.class.getDeclaredField("client");
-        field.setAccessible(true);
-        field.set(configuration, externalTaskClient);
+        var mockWorkerAnnotation = mock(com.jeevision.bpm.worker.annotation.BPMWorker.class);
+        when(mockWorkerAnnotation.lockDuration()).thenReturn(10000L);
         
-        // When
-        configuration.subscribeToTopics();
+        for (var workerMethod : workerRegistry.getAllWorkerMethods().values()) {
+            when(workerMethod.getWorkerAnnotation()).thenReturn(mockWorkerAnnotation);
+        }
         
-        // Then
-        verify(externalTaskClient, times(2)).subscribe(anyString());
-        verify(workerRegistry).getRegisteredTopics();
+        var mockSubscriptionBuilder = mock(org.camunda.bpm.client.task.ExternalTaskSubscriptionBuilder.class);
+        when(externalTaskClient.subscribe(anyString())).thenReturn(mockSubscriptionBuilder);
+        when(mockSubscriptionBuilder.lockDuration(anyLong())).thenReturn(mockSubscriptionBuilder);
+        when(mockSubscriptionBuilder.handler(any())).thenReturn(mockSubscriptionBuilder);
+        
+        try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
+            mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
+            when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.workerId(isNull())).thenReturn(clientBuilder);
+            when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
+            when(clientBuilder.asyncResponseTimeout(anyLong())).thenReturn(clientBuilder);
+            when(clientBuilder.lockDuration(anyLong())).thenReturn(clientBuilder);
+            when(clientBuilder.usePriority(anyBoolean())).thenReturn(clientBuilder);
+            when(clientBuilder.build()).thenReturn(externalTaskClient);
+            
+            // When
+            configuration.subscribeToTopics();
+            
+            // Then
+            verify(externalTaskClient, times(2)).subscribe(anyString());
+            verify(workerRegistry).getAllWorkerMethods();
+        }
     }
 
     @Test
@@ -221,19 +242,26 @@ class ExternalTaskClientConfigurationTest {
     @Test
     void testSubscribeToTopics_WithEmptyTopics() throws Exception {
         // Given
+        when(workerRegistry.getAllWorkerMethods()).thenReturn(Map.of());
         when(workerRegistry.getRegisteredTopics()).thenReturn(Set.of());
         
-        // Use reflection to set the private client field
-        Field field = ExternalTaskClientConfiguration.class.getDeclaredField("client");
-        field.setAccessible(true);
-        field.set(configuration, externalTaskClient);
-        
-        // When
-        configuration.subscribeToTopics();
-        
-        // Then
-        verify(externalTaskClient, never()).subscribe(anyString());
-        verify(workerRegistry).getRegisteredTopics();
+        try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
+            mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
+            when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.workerId(isNull())).thenReturn(clientBuilder);
+            when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
+            when(clientBuilder.asyncResponseTimeout(anyLong())).thenReturn(clientBuilder);
+            when(clientBuilder.lockDuration(anyLong())).thenReturn(clientBuilder);
+            when(clientBuilder.usePriority(anyBoolean())).thenReturn(clientBuilder);
+            when(clientBuilder.build()).thenReturn(externalTaskClient);
+            
+            // When
+            configuration.subscribeToTopics();
+            
+            // Then
+            verify(externalTaskClient, never()).subscribe(anyString());
+            verify(workerRegistry).getAllWorkerMethods();
+        }
     }
 
     @Test
