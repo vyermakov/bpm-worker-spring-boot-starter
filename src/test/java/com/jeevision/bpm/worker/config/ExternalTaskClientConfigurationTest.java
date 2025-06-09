@@ -22,6 +22,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -55,7 +56,7 @@ class ExternalTaskClientConfigurationTest {
     @BeforeEach
     void setUp() {
         configuration = new ExternalTaskClientConfiguration(properties, workerRegistry, objectMapper);
-        when(properties.getAuth()).thenReturn(auth);
+        lenient().when(properties.getAuth()).thenReturn(auth);
     }
 
     @Test
@@ -69,6 +70,8 @@ class ExternalTaskClientConfigurationTest {
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
             when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.workerId(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
             when(clientBuilder.addInterceptor(any(ClientRequestInterceptor.class))).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
             
@@ -94,6 +97,8 @@ class ExternalTaskClientConfigurationTest {
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
             when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.workerId(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
             when(clientBuilder.addInterceptor(any(ClientRequestInterceptor.class))).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
             
@@ -119,6 +124,8 @@ class ExternalTaskClientConfigurationTest {
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
             when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.workerId(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
             
             // When
@@ -138,8 +145,8 @@ class ExternalTaskClientConfigurationTest {
         Set<String> topics = Set.of("topic1", "topic2");
         when(workerRegistry.getRegisteredTopics()).thenReturn(topics);
         
-        // Use reflection to set the private externalTaskClient field
-        Field field = ExternalTaskClientConfiguration.class.getDeclaredField("externalTaskClient");
+        // Use reflection to set the private client field
+        Field field = ExternalTaskClientConfiguration.class.getDeclaredField("client");
         field.setAccessible(true);
         field.set(configuration, externalTaskClient);
         
@@ -201,8 +208,8 @@ class ExternalTaskClientConfigurationTest {
         // Given
         when(workerRegistry.getRegisteredTopics()).thenReturn(Set.of());
         
-        // Use reflection to set the private externalTaskClient field
-        Field field = ExternalTaskClientConfiguration.class.getDeclaredField("externalTaskClient");
+        // Use reflection to set the private client field
+        Field field = ExternalTaskClientConfiguration.class.getDeclaredField("client");
         field.setAccessible(true);
         field.set(configuration, externalTaskClient);
         
@@ -225,6 +232,8 @@ class ExternalTaskClientConfigurationTest {
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
             when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.workerId(anyString())).thenReturn(clientBuilder);
+            when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
             when(clientBuilder.addInterceptor(any(ClientRequestInterceptor.class))).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
             
