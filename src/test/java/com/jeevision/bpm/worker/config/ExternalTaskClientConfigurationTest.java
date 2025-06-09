@@ -187,6 +187,12 @@ class ExternalTaskClientConfigurationTest {
         var mockTopicSubscriptionBuilder = mock(TopicSubscriptionBuilder.class);
         when(externalTaskClient.subscribe(anyString())).thenReturn(mockTopicSubscriptionBuilder);
         
+        // Set up the external task client to be available for subscription
+        when(properties.getBaseUrl()).thenReturn("http://localhost:8080/engine-rest");
+        when(auth.getUsername()).thenReturn("");
+        when(auth.getPassword()).thenReturn("");
+        when(auth.getToken()).thenReturn("");
+        
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
             when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
@@ -196,6 +202,9 @@ class ExternalTaskClientConfigurationTest {
             when(clientBuilder.lockDuration(anyLong())).thenReturn(clientBuilder);
             when(clientBuilder.usePriority(anyBoolean())).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
+            
+            // Create the client first to ensure it's available
+            configuration.externalTaskClient();
             
             // When
             configuration.subscribeToTopics();
@@ -257,6 +266,12 @@ class ExternalTaskClientConfigurationTest {
         when(workerRegistry.getAllWorkerMethods()).thenReturn(Map.of());
         when(workerRegistry.getRegisteredTopics()).thenReturn(Set.of());
         
+        // Set up the external task client to be available for subscription
+        when(properties.getBaseUrl()).thenReturn("http://localhost:8080/engine-rest");
+        when(auth.getUsername()).thenReturn("");
+        when(auth.getPassword()).thenReturn("");
+        when(auth.getToken()).thenReturn("");
+        
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
             when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
@@ -266,6 +281,9 @@ class ExternalTaskClientConfigurationTest {
             when(clientBuilder.lockDuration(anyLong())).thenReturn(clientBuilder);
             when(clientBuilder.usePriority(anyBoolean())).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
+            
+            // Create the client first to ensure it's available
+            configuration.externalTaskClient();
             
             // When
             configuration.subscribeToTopics();
