@@ -185,6 +185,8 @@ class ExternalTaskClientConfigurationTest {
         
         // Mock the subscription builder chain - using generic Object since exact classes may not be available
         var mockTopicSubscriptionBuilder = mock(TopicSubscriptionBuilder.class);
+        when(mockTopicSubscriptionBuilder.lockDuration(anyLong())).thenReturn(mockTopicSubscriptionBuilder);
+        when(mockTopicSubscriptionBuilder.handler(any())).thenReturn(mockTopicSubscriptionBuilder);
         when(externalTaskClient.subscribe(anyString())).thenReturn(mockTopicSubscriptionBuilder);
         
         // Set up the external task client to be available for subscription
