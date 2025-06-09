@@ -58,7 +58,6 @@ class BpmTaskHandlerTest {
         String taskId = "task-123";
         String topicName = "test-topic";
         Map<String, Object> variables = Map.of("input", "test-value");
-        Map<String, Object> resultVariables = Map.of("output", "result-value");
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
