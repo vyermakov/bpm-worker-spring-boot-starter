@@ -62,6 +62,7 @@ class ExternalTaskClientConfigurationTest {
         lenient().when(properties.getMaxTasks()).thenReturn(10);
         lenient().when(properties.getAsyncResponseTimeout()).thenReturn(5000L);
         lenient().when(properties.getLockDuration()).thenReturn(10000L);
+        lenient().when(properties.isUsePriority()).thenReturn(false);
     }
 
     @Test
@@ -79,6 +80,7 @@ class ExternalTaskClientConfigurationTest {
             when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
             when(clientBuilder.asyncResponseTimeout(anyLong())).thenReturn(clientBuilder);
             when(clientBuilder.lockDuration(anyLong())).thenReturn(clientBuilder);
+            when(clientBuilder.usePriority(anyBoolean())).thenReturn(clientBuilder);
             when(clientBuilder.addInterceptor(any(ClientRequestInterceptor.class))).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
             
@@ -108,6 +110,7 @@ class ExternalTaskClientConfigurationTest {
             when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
             when(clientBuilder.asyncResponseTimeout(anyLong())).thenReturn(clientBuilder);
             when(clientBuilder.lockDuration(anyLong())).thenReturn(clientBuilder);
+            when(clientBuilder.usePriority(anyBoolean())).thenReturn(clientBuilder);
             when(clientBuilder.addInterceptor(any(ClientRequestInterceptor.class))).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
             
@@ -137,6 +140,7 @@ class ExternalTaskClientConfigurationTest {
             when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
             when(clientBuilder.asyncResponseTimeout(anyLong())).thenReturn(clientBuilder);
             when(clientBuilder.lockDuration(anyLong())).thenReturn(clientBuilder);
+            when(clientBuilder.usePriority(anyBoolean())).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
             
             // When
@@ -247,6 +251,7 @@ class ExternalTaskClientConfigurationTest {
             when(clientBuilder.maxTasks(anyInt())).thenReturn(clientBuilder);
             when(clientBuilder.asyncResponseTimeout(anyLong())).thenReturn(clientBuilder);
             when(clientBuilder.lockDuration(anyLong())).thenReturn(clientBuilder);
+            when(clientBuilder.usePriority(anyBoolean())).thenReturn(clientBuilder);
             when(clientBuilder.addInterceptor(any(ClientRequestInterceptor.class))).thenReturn(clientBuilder);
             when(clientBuilder.build()).thenReturn(externalTaskClient);
             
