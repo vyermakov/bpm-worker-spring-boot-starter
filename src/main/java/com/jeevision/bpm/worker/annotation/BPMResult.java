@@ -16,33 +16,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BPMResult {
     
-    /**
-     * The name of the process variable to set.
-     * If not specified, "result" will be used.
-     */
     String name() default "result";
-    
-    /**
-     * Whether to flatten the object properties as separate variables.
-     * If true, object properties will be set as individual process variables.
-     */
     boolean flatten() default false;
-    
-    /**
-     * Prefix to use when flattening object properties.
-     * Only applicable when flatten is true.
-     */
     String flattenPrefix() default "";
-    
-    /**
-     * Strategy for handling null return values.
-     */
     NullHandling nullHandling() default NullHandling.SET_NULL;
-    
-    /**
-     * Whether to include null properties when flattening objects.
-     * Only applicable when flatten is true.
-     */
     boolean includeNullProperties() default false;
     
     enum NullHandling {

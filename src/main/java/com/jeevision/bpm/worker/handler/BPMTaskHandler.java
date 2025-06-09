@@ -60,12 +60,10 @@ public class BPMTaskHandler implements ExternalTaskHandler {
         var taskId = externalTask.getId();
         var topicName = externalTask.getTopicName();
         
-        // Unwrap InvocationTargetException to get the actual cause
         var actualException = e.getCause() != null ? e.getCause() : e;
         
         log.error("Error executing task {} for topic {}: {}", taskId, topicName, actualException.getMessage(), actualException);
         
-        // Check throws clause @BPMError annotations first (highest priority for type usage)
         var throwsMapping = workerMethod.getThrowsExceptionMappings().get(actualException.getClass());
         if (throwsMapping != null) {
             var errorCode = throwsMapping.getErrorCode();
@@ -76,7 +74,6 @@ public class BPMTaskHandler implements ExternalTaskHandler {
             return;
         }
         
-        // Check if the exception class has @BPMError annotation
         var errorAnnotation = AnnotatedElementUtils.findMergedAnnotation(actualException.getClass(), BPMError.class);
         if (errorAnnotation != null) {
             var errorCode = errorAnnotation.errorCode();
@@ -87,7 +84,6 @@ public class BPMTaskHandler implements ExternalTaskHandler {
             return;
         }
         
-        // Check method-level @BPMError annotation for error mappings
         var methodErrorAnnotation = AnnotatedElementUtils.findMergedAnnotation(workerMethod.getMethod(), BPMError.class);
         if (methodErrorAnnotation != null) {
             var errorMapping = findErrorMapping(methodErrorAnnotation, actualException);
@@ -100,7 +96,6 @@ public class BPMTaskHandler implements ExternalTaskHandler {
                 return;
             }
             
-            // If method has @BPMError but no specific mapping found, use the default error code
             if (StringUtils.hasText(methodErrorAnnotation.errorCode())) {
                 var errorMessage = StringUtils.hasText(methodErrorAnnotation.errorMessage()) 
                         ? methodErrorAnnotation.errorMessage() 
@@ -110,7 +105,6 @@ public class BPMTaskHandler implements ExternalTaskHandler {
             }
         }
         
-        // Default: handle as technical failure/incident
         handleTechnicalFailure(externalTask, externalTaskService, actualException);
     }
     
@@ -134,7 +128,6 @@ public class BPMTaskHandler implements ExternalTaskHandler {
         
         log.warn("Handling technical failure for task {} with error: {}", externalTask.getId(), errorDetails);
         
-        // Handle as incident with retry count and retry timeout
         var retries = 3;
         var retryTimeout = 10000; // 10 seconds
         externalTaskService.handleFailure(externalTask, errorMessage, errorDetails, retries, retryTimeout);
@@ -149,7 +142,6 @@ public class BPMTaskHandler implements ExternalTaskHandler {
     private Object resolveParameterValue(ExternalTask externalTask, WorkerMethod.ParameterInfo paramInfo) {
         var variableName = paramInfo.getVariableName();
         
-        // Special handling for ExternalTask and ExternalTaskService
         if (paramInfo.getType().equals(ExternalTask.class)) {
             return externalTask;
         }

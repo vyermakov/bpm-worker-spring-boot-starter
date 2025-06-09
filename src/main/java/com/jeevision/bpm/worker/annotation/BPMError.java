@@ -18,39 +18,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BPMError {
     
-    /**
-     * The BPMN error code to be used when this exception occurs.
-     */
     String errorCode();
-    
-    /**
-     * Optional error message. If not provided, the exception message will be used.
-     */
     String errorMessage() default "";
-    
-    /**
-     * Map specific exception types to error codes.
-     * Alternative to using the annotation on exception classes directly.
-     */
     ErrorMapping[] errorMappings() default {};
     
-    /**
-     * Mapping between exception types and BPMN error codes.
-     */
     @interface ErrorMapping {
-        /**
-         * The exception class to map.
-         */
         Class<? extends Throwable> exception();
-        
-        /**
-         * The BPMN error code for this exception.
-         */
         String errorCode();
-        
-        /**
-         * Optional error message for this exception type.
-         */
         String errorMessage() default "";
     }
     

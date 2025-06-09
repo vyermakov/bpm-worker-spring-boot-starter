@@ -16,21 +16,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BPMVariable {
     
-    /**
-     * The name of the process/task variable.
-     * If not specified, the parameter name will be used.
-     * Can be a SpEL expression (e.g. "#{'prefix-' + environment.getProperty('bpm.vars.suffix')}")
-     */
     String value() default "";
-    
-    /**
-     * Whether this variable is required.
-     * If true and variable is not found, an exception will be thrown.
-     */
     boolean required() default false;
-    
-    /**
-     * Default value to use if variable is not found.
-     */
     String defaultValue() default "";
 }
