@@ -6,6 +6,7 @@ import org.camunda.bpm.client.ExternalTaskClient;
 import org.camunda.bpm.client.ExternalTaskClientBuilder;
 import org.camunda.bpm.client.interceptor.ClientRequestContext;
 import org.camunda.bpm.client.interceptor.ClientRequestInterceptor;
+import org.camunda.bpm.client.task.ExternalTaskSubscriptionBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
