@@ -1,5 +1,6 @@
 package com.jeevision.bpm.worker.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jeevision.bpm.worker.registry.BPMWorkerRegistry;
 import org.camunda.bpm.client.ExternalTaskClient;
 import org.camunda.bpm.client.ExternalTaskClientBuilder;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
@@ -37,6 +39,9 @@ class ExternalTaskClientConfigurationTest {
     private BPMWorkerRegistry workerRegistry;
     
     @Mock
+    private ObjectMapper objectMapper;
+    
+    @Mock
     private ExternalTaskClientBuilder clientBuilder;
     
     @Mock
@@ -49,7 +54,7 @@ class ExternalTaskClientConfigurationTest {
 
     @BeforeEach
     void setUp() {
-        configuration = new ExternalTaskClientConfiguration(properties, workerRegistry);
+        configuration = new ExternalTaskClientConfiguration(properties, workerRegistry, objectMapper);
         when(properties.getAuth()).thenReturn(auth);
     }
 
@@ -128,13 +133,15 @@ class ExternalTaskClientConfigurationTest {
     }
 
     @Test
-    void testSubscribeToTopics() {
+    void testSubscribeToTopics() throws Exception {
         // Given
         Set<String> topics = Set.of("topic1", "topic2");
         when(workerRegistry.getRegisteredTopics()).thenReturn(topics);
         
-        // Mock the externalTaskClient field
-        configuration.externalTaskClient = externalTaskClient;
+        // Use reflection to set the private externalTaskClient field
+        Field field = ExternalTaskClientConfiguration.class.getDeclaredField("externalTaskClient");
+        field.setAccessible(true);
+        field.set(configuration, externalTaskClient);
         
         // When
         configuration.subscribeToTopics();
@@ -190,10 +197,14 @@ class ExternalTaskClientConfigurationTest {
     }
 
     @Test
-    void testSubscribeToTopics_WithEmptyTopics() {
+    void testSubscribeToTopics_WithEmptyTopics() throws Exception {
         // Given
         when(workerRegistry.getRegisteredTopics()).thenReturn(Set.of());
-        configuration.externalTaskClient = externalTaskClient;
+        
+        // Use reflection to set the private externalTaskClient field
+        Field field = ExternalTaskClientConfiguration.class.getDeclaredField("externalTaskClient");
+        field.setAccessible(true);
+        field.set(configuration, externalTaskClient);
         
         // When
         configuration.subscribeToTopics();
