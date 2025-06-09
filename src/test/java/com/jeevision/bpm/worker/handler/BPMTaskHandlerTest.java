@@ -1,10 +1,21 @@
 package com.jeevision.bpm.worker.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.annotation.BPMError;
-import com.jeevision.bpm.worker.annotation.BPMResult;
-import com.jeevision.bpm.worker.annotation.BPMVariable;
-import com.jeevision.bpm.worker.model.WorkerMethod;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,16 +24,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jeevision.bpm.worker.annotation.BPMError;
+import com.jeevision.bpm.worker.annotation.BPMResult;
+import com.jeevision.bpm.worker.annotation.BPMVariable;
+import com.jeevision.bpm.worker.model.WorkerMethod;
 
 @ExtendWith(MockitoExtension.class)
 class BPMTaskHandlerTest {
