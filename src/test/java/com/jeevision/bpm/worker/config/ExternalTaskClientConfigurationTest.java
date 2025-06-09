@@ -6,7 +6,6 @@ import org.camunda.bpm.client.ExternalTaskClient;
 import org.camunda.bpm.client.ExternalTaskClientBuilder;
 import org.camunda.bpm.client.interceptor.ClientRequestContext;
 import org.camunda.bpm.client.interceptor.ClientRequestInterceptor;
-import org.camunda.bpm.client.task.ExternalTaskSubscriptionBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -172,10 +171,13 @@ class ExternalTaskClientConfigurationTest {
             when(workerMethod.getWorkerAnnotation()).thenReturn(mockWorkerAnnotation);
         }
         
-        var mockSubscriptionBuilder = mock(org.camunda.bpm.client.task.ExternalTaskSubscriptionBuilder.class);
-        when(externalTaskClient.subscribe(anyString())).thenReturn(mockSubscriptionBuilder);
-        when(mockSubscriptionBuilder.lockDuration(anyLong())).thenReturn(mockSubscriptionBuilder);
-        when(mockSubscriptionBuilder.handler(any())).thenReturn(mockSubscriptionBuilder);
+        // Mock the subscription builder chain
+        var mockSubscriptionBuilder = mock(org.camunda.bpm.client.task.ExternalTaskSubscription.class);
+        var mockTopicSubscriptionBuilder = mock(org.camunda.bpm.client.topic.TopicSubscriptionBuilder.class);
+        when(externalTaskClient.subscribe(anyString())).thenReturn(mockTopicSubscriptionBuilder);
+        when(mockTopicSubscriptionBuilder.lockDuration(anyLong())).thenReturn(mockTopicSubscriptionBuilder);
+        when(mockTopicSubscriptionBuilder.handler(any())).thenReturn(mockTopicSubscriptionBuilder);
+        when(mockTopicSubscriptionBuilder.open()).thenReturn(mockSubscriptionBuilder);
         
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
