@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -60,7 +61,7 @@ class BpmTaskHandlerTest {
         retryConfig.setUseExponentialBackoff(true);
         retryConfig.setBackoffMultiplier(2.0);
         
-        when(properties.getRetry()).thenReturn(retryConfig);
+        lenient().when(properties.getRetry()).thenReturn(retryConfig);
         
         taskHandler = new BpmTaskHandler(objectMapper, properties);
     }
