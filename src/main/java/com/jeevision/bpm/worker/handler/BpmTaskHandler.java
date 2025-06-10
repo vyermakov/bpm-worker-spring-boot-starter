@@ -112,14 +112,14 @@ public class BpmTaskHandler implements ExternalTaskHandler {
             return flattenResult(result, resultAnnotation);
         }
         
-        return Map.of(resultAnnotation.name(), result);
+        return Map.of(resultAnnotation.value(), result);
     }
     
     private Map<String, Object> handleNullResult(BpmResult resultAnnotation) {
         return switch (resultAnnotation.nullHandling()) {
             case SET_NULL -> {
                 Map<String, Object> result = new HashMap<>();
-                result.put(resultAnnotation.name(), null);
+                result.put(resultAnnotation.value(), null);
                 yield result;
             }
             case SKIP -> Map.of();
@@ -147,7 +147,7 @@ public class BpmTaskHandler implements ExternalTaskHandler {
             
         } catch (Exception e) {
             log.warn("Could not flatten result object: {}", e.getMessage());
-            return Map.of(resultAnnotation.name(), result);
+            return Map.of(resultAnnotation.value(), result);
         }
     }
     

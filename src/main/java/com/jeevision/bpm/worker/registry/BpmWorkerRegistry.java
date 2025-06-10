@@ -100,7 +100,8 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
     }
     
     private String determineTopic(BpmWorker annotation) {
-        String topic = StringUtils.hasText(annotation.value()) ? annotation.value() : annotation.topic();
+        // Use value() as primary since it's aliased to topic()
+        String topic = annotation.value();
         return evaluateSpelExpression(topic);
     }
     
@@ -183,14 +184,14 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
                 WorkerMethod.ThrowsExceptionInfo exceptionInfo = WorkerMethod.ThrowsExceptionInfo.builder()
                         .exceptionType(throwableType)
                         .bpmErrorAnnotation(bpmError)
-                        .errorCode(bpmError.code())
-                        .errorMessage(StringUtils.hasText(bpmError.message()) ? bpmError.message() : "")
+                        .errorCode(bpmError.errorCode())
+                        .errorMessage(StringUtils.hasText(bpmError.errorMessage()) ? bpmError.errorMessage() : "")
                         .build();
                 
                 mappings.put(throwableType, exceptionInfo);
                 
                 log.debug("Registered BpmError mapping for exception {} with error code '{}'", 
-                        exceptionType.getSimpleName(), bpmError.code());
+                        exceptionType.getSimpleName(), bpmError.errorCode());
             }
         }
         

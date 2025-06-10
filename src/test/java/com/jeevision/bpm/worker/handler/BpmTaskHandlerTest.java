@@ -75,7 +75,7 @@ class BpmTaskHandlerTest {
                 .build();
 
         BpmResult resultAnnotation = mock(BpmResult.class);
-        when(resultAnnotation.name()).thenReturn("output");
+        when(resultAnnotation.value()).thenReturn("output");
         when(resultAnnotation.flatten()).thenReturn(false);
 
         when(workerMethod.getBean()).thenReturn(mockBean);
@@ -244,7 +244,7 @@ class BpmTaskHandlerTest {
                 .build();
 
         BpmResult resultAnnotation = mock(BpmResult.class);
-        when(resultAnnotation.name()).thenReturn("output");
+        when(resultAnnotation.value()).thenReturn("output");
         when(resultAnnotation.nullHandling()).thenReturn(BpmResult.NullHandling.SET_NULL);
 
         when(workerMethod.getBean()).thenReturn(mockBean);
@@ -353,7 +353,7 @@ class BpmTaskHandlerTest {
     }
 
     public static class TestWorkerWithError {
-        public String processTaskWithError(@BpmVariable("input") String input) throws @BpmError(code = "BUSINESS_ERROR", message = "Business validation failed") IllegalArgumentException {
+        public String processTaskWithError(@BpmVariable("input") String input) throws @BpmError(errorCode = "BUSINESS_ERROR", errorMessage = "Business validation failed") IllegalArgumentException {
             if ("error-trigger".equals(input)) {
                 throw new IllegalArgumentException("Business validation failed");
             }
