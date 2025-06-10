@@ -163,6 +163,7 @@ class BpmTaskHandlerTest {
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
         when(externalTask.getAllVariables()).thenReturn(variables);
+        when(externalTask.getRetries()).thenReturn(null);
 
         Object mockBean = new TestWorkerWithRuntimeError();
         Method mockMethod = TestWorkerWithRuntimeError.class.getMethod("processTaskWithRuntimeError", String.class);
@@ -186,7 +187,7 @@ class BpmTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).handleFailure(eq(externalTask), eq("Runtime error occurred"), anyString(), eq(3), eq(60000L));
+        verify(externalTaskService).handleFailure(eq(externalTask), eq("Runtime error occurred"), anyString(), eq(2), eq(60000L));
         verify(externalTaskService, never()).complete(any(), any());
         verify(externalTaskService, never()).handleBpmnError(any(ExternalTask.class), any(), any());
     }

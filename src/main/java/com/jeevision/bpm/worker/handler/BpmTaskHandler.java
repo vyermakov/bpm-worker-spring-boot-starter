@@ -174,27 +174,28 @@ public class BpmTaskHandler implements ExternalTaskHandler {
             // Report as technical failure/incident with retry configuration
             String errorMessage = cause.getMessage() != null ? cause.getMessage() : cause.getClass().getSimpleName();
             
-            int currentRetries = externalTask.getRetries() != null ? externalTask.getRetries() : 0;
             int maxRetries = properties.getRetry().getMaxRetries();
+            int currentRetries = externalTask.getRetries() != null ? externalTask.getRetries() : maxRetries;
             long retryTimeout = calculateRetryTimeout(currentRetries);
             
-            log.error("Handling technical failure for task {} (retry {}/{}): {}", 
-                    externalTask.getId(), currentRetries, maxRetries, errorMessage, cause);
+            log.error("Handling technical failure for task {} (retry {}/{}, backoff {}ms): {}", 
+                    externalTask.getId(), maxRetries - currentRetries + 1, maxRetries, retryTimeout, errorMessage, cause);
             
             externalTaskService.handleFailure(externalTask, errorMessage, 
-                    cause.toString(), maxRetries, retryTimeout);
+                    cause.toString(), --currentRetries, retryTimeout);
         }
     }
     
     private long calculateRetryTimeout(int currentRetries) {
         var retryConfig = properties.getRetry();
         long baseTimeout = retryConfig.getRetryTimeout();
+        int maxRetries = retryConfig.getMaxRetries();
         
         if (!retryConfig.isUseExponentialBackoff()) {
             return baseTimeout;
         }
         
-        // Calculate exponential backoff: baseTimeout * (multiplier ^ currentRetries)
-        return (long) (baseTimeout * Math.pow(retryConfig.getBackoffMultiplier(), currentRetries));
+        // Calculate exponential backoff
+        return (long) (baseTimeout * Math.pow(2, (maxRetries - currentRetries)));
     }
 }
