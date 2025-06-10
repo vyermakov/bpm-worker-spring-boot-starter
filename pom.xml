@@ -233,6 +233,8 @@
 									<gpgArguments>
 										<arg>--pinentry-mode</arg>
 										<arg>loopback</arg>
+										<arg>--batch</arg>
+										<arg>--no-tty</arg>
 									</gpgArguments>
 								</configuration>
 							</execution>
@@ -255,6 +257,30 @@
 						<configuration>
 							<deployAtEnd>true</deployAtEnd>
 						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>net.nicoulaj.maven.plugins</groupId>
+						<artifactId>checksum-maven-plugin</artifactId>
+						<version>1.11</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>artifacts</goal>
+								</goals>
+								<phase>verify</phase>
+								<configuration>
+									<algorithms>
+										<algorithm>MD5</algorithm>
+										<algorithm>SHA1</algorithm>
+									</algorithms>
+									<csvSummary>false</csvSummary>
+									<xmlSummary>false</xmlSummary>
+									<failOnError>true</failOnError>
+									<attachChecksums>true</attachChecksums>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
