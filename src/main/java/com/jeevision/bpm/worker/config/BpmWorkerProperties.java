@@ -21,11 +21,20 @@ public class BpmWorkerProperties {
     private long lockDuration = 30000;
     private boolean usePriority = true;
     private Authentication auth = new Authentication();
+    private Retry retry = new Retry();
     
     @Data
     public static class Authentication {
         private String username;
         private String password;
         private String token;
+    }
+    
+    @Data
+    public static class Retry {
+        private int maxRetries = 3;
+        private long retryTimeout = 60000; // 1 minute in milliseconds
+        private boolean useExponentialBackoff = true;
+        private double backoffMultiplier = 2.0;
     }
 }

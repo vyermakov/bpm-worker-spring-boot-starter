@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jeevision.bpm.worker.annotation.BpmResult;
+import com.jeevision.bpm.worker.config.BpmWorkerProperties;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BpmTaskHandler implements ExternalTaskHandler {
     
     private final ObjectMapper objectMapper;
+    private final BpmWorkerProperties properties;
     private WorkerMethod workerMethod;
     
     public BpmTaskHandler withWorkerMethod(WorkerMethod workerMethod) {
@@ -169,13 +171,30 @@ public class BpmTaskHandler implements ExternalTaskHandler {
             
             externalTaskService.handleBpmnError(externalTask, errorCode, errorMessage);
         } else {
-            // Report as technical failure/incident
+            // Report as technical failure/incident with retry configuration
             String errorMessage = cause.getMessage() != null ? cause.getMessage() : cause.getClass().getSimpleName();
             
-            log.error("Handling technical failure for task {}: {}", externalTask.getId(), errorMessage, cause);
+            int currentRetries = externalTask.getRetries() != null ? externalTask.getRetries() : 0;
+            int maxRetries = properties.getRetry().getMaxRetries();
+            long retryTimeout = calculateRetryTimeout(currentRetries);
+            
+            log.error("Handling technical failure for task {} (retry {}/{}): {}", 
+                    externalTask.getId(), currentRetries, maxRetries, errorMessage, cause);
             
             externalTaskService.handleFailure(externalTask, errorMessage, 
-                    cause.toString(), 0, 0);
+                    cause.toString(), maxRetries, retryTimeout);
         }
+    }
+    
+    private long calculateRetryTimeout(int currentRetries) {
+        var retryConfig = properties.getRetry();
+        long baseTimeout = retryConfig.getRetryTimeout();
+        
+        if (!retryConfig.isUseExponentialBackoff()) {
+            return baseTimeout;
+        }
+        
+        // Calculate exponential backoff: baseTimeout * (multiplier ^ currentRetries)
+        return (long) (baseTimeout * Math.pow(retryConfig.getBackoffMultiplier(), currentRetries));
     }
 }
