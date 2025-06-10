@@ -115,12 +115,10 @@ class BpmTaskHandlerTest {
                 .required(false)
                 .defaultValue("")
                 .build();
-
-        BpmError bpmError = mockMethod.getAnnotation(BpmError.class);
         
         WorkerMethod.ThrowsExceptionInfo throwsInfo = WorkerMethod.ThrowsExceptionInfo.builder()
                 .exceptionType(IllegalArgumentException.class)
-                .bmpErrorAnnotation(bpmError)
+                .bpmErrorAnnotation(null)
                 .errorCode("BUSINESS_ERROR")
                 .errorMessage("Business validation failed")
                 .build();
@@ -136,7 +134,7 @@ class BpmTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).handleBpmnError(eq(externalTask), eq("BUSINESS_ERROR"), eq("Business validation failed"), any());
+        verify(externalTaskService).handleBpmnError(eq(externalTask), eq("BUSINESS_ERROR"), eq("Business validation failed"));
         verify(externalTaskService, never()).complete(any(), any());
         verify(externalTaskService, never()).handleFailure(any(ExternalTask.class), any(), any(), anyInt(), anyLong());
     }
@@ -174,9 +172,9 @@ class BpmTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).handleFailure(eq(externalTask), eq("Runtime error occurred"), anyString(), eq(3), eq(10000L));
+        verify(externalTaskService).handleFailure(eq(externalTask), eq("Runtime error occurred"), anyString(), eq(0), eq(0L));
         verify(externalTaskService, never()).complete(any(), any());
-        verify(externalTaskService, never()).handleBpmnError(any(ExternalTask.class), any(), any(), any());
+        verify(externalTaskService, never()).handleBpmnError(any(ExternalTask.class), any(), any());
     }
 
     @Test
@@ -355,10 +353,7 @@ class BpmTaskHandlerTest {
     }
 
     public static class TestWorkerWithError {
-        @BpmError(errorCode = "DEFAULT_ERROR", errorMappings = {
-            @BpmError.ErrorMapping(exception = IllegalArgumentException.class, errorCode = "BUSINESS_ERROR", errorMessage = "Business validation failed")
-        })
-        public String processTaskWithError(@BpmVariable("input") String input) {
+        public String processTaskWithError(@BpmVariable("input") String input) throws @BpmError(errorCode = "BUSINESS_ERROR", errorMessage = "Business validation failed") IllegalArgumentException {
             if ("error-trigger".equals(input)) {
                 throw new IllegalArgumentException("Business validation failed");
             }
