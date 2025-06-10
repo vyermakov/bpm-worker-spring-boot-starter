@@ -64,7 +64,8 @@ jobs:
           -Dtag=v${{ github.event.inputs.releaseVersion }} \
           -DpushChanges=false \
           -DlocalCheckout=true \
-          -B
+          -B \
+          -s .github/settings.xml
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
@@ -72,7 +73,7 @@ jobs:
     
     - name: Perform release
       run: |
-        mvn release:perform -B
+        mvn release:perform -B -s .github/settings.xml
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
