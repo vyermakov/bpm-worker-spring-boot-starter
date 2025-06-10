@@ -41,7 +41,7 @@ public class BpmWorkerAutoConfiguration {
     
     @Bean
     @ConditionalOnMissingBean
-    public BpmTaskHandler bmpTaskHandler(ObjectMapper objectMapper) {
-        return new BpmTaskHandler(objectMapper);
+    public BpmTaskHandler bmpTaskHandler(ObjectMapper objectMapper, BpmWorkerProperties properties) {
+        return new BpmTaskHandler(objectMapper, properties);
     }
 }

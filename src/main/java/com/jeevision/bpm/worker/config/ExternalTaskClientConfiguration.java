@@ -31,6 +31,7 @@ public class ExternalTaskClientConfiguration {
     private final BpmWorkerProperties properties;
     private final BpmWorkerRegistry workerRegistry;
     private final ObjectMapper objectMapper;
+    private final BpmTaskHandler bpmTaskHandler;
     
     @Bean
     public ExternalTaskClient externalTaskClient() {
@@ -68,7 +69,7 @@ public class ExternalTaskClientConfiguration {
             
             client.subscribe(topic)
                     .lockDuration(workerMethod.getWorkerAnnotation().lockDuration())
-                    .handler(new BpmTaskHandler(objectMapper).withWorkerMethod(workerMethod))
+                    .handler(new BpmTaskHandler(objectMapper, properties).withWorkerMethod(workerMethod))
                     .open();
         });
         

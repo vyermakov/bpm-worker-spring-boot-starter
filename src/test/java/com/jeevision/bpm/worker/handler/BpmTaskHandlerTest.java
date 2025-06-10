@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jeevision.bpm.worker.annotation.BpmError;
 import com.jeevision.bpm.worker.annotation.BpmResult;
 import com.jeevision.bpm.worker.annotation.BpmVariable;
+import com.jeevision.bpm.worker.config.BpmWorkerProperties;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +36,9 @@ class BpmTaskHandlerTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private BpmWorkerProperties properties;
 
     @Mock
     private ExternalTask externalTask;
@@ -49,7 +53,16 @@ class BpmTaskHandlerTest {
 
     @BeforeEach
     void setUp() {
-        taskHandler = new BpmTaskHandler(objectMapper);
+        // Setup default retry properties
+        BpmWorkerProperties.Retry retryConfig = new BpmWorkerProperties.Retry();
+        retryConfig.setMaxRetries(3);
+        retryConfig.setRetryTimeout(60000L);
+        retryConfig.setUseExponentialBackoff(true);
+        retryConfig.setBackoffMultiplier(2.0);
+        
+        when(properties.getRetry()).thenReturn(retryConfig);
+        
+        taskHandler = new BpmTaskHandler(objectMapper, properties);
     }
 
     @Test
@@ -172,7 +185,7 @@ class BpmTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).handleFailure(eq(externalTask), eq("Runtime error occurred"), anyString(), eq(0), eq(0L));
+        verify(externalTaskService).handleFailure(eq(externalTask), eq("Runtime error occurred"), anyString(), eq(3), eq(60000L));
         verify(externalTaskService, never()).complete(any(), any());
         verify(externalTaskService, never()).handleBpmnError(any(ExternalTask.class), any(), any());
     }
