@@ -1,7 +1,9 @@
 package com.jeevision.bpm.worker.registry;
 
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.jeevision.bpm.worker.annotation.BpmError;
 import com.jeevision.bpm.worker.annotation.BpmResult;
 import com.jeevision.bpm.worker.annotation.BpmVariable;
 import com.jeevision.bpm.worker.annotation.BpmWorker;
@@ -80,6 +83,7 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
         
         List<WorkerMethod.ParameterInfo> parameters = extractParameters(method);
         BpmResult resultAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, BpmResult.class);
+        Map<Class<? extends Throwable>, WorkerMethod.ThrowsExceptionInfo> exceptionMappings = extractExceptionMappings(method);
         
         WorkerMethod workerMethod = WorkerMethod.builder()
                 .bean(bean)
@@ -88,6 +92,7 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
                 .resultAnnotation(resultAnnotation)
                 .parameters(parameters)
                 .topic(topic)
+                .throwsExceptionMappings(exceptionMappings)
                 .build();
         
         workerMethods.put(topic, workerMethod);
@@ -158,5 +163,37 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
     
     public Map<String, WorkerMethod> getAllWorkerMethods() {
         return Map.copyOf(workerMethods);
+    }
+    
+    private Map<Class<? extends Throwable>, WorkerMethod.ThrowsExceptionInfo> extractExceptionMappings(Method method) {
+        Map<Class<? extends Throwable>, WorkerMethod.ThrowsExceptionInfo> mappings = new HashMap<>();
+        
+        AnnotatedType[] annotatedExceptionTypes = method.getAnnotatedExceptionTypes();
+        Class<?>[] exceptionTypes = method.getExceptionTypes();
+        
+        for (int i = 0; i < exceptionTypes.length; i++) {
+            Class<?> exceptionType = exceptionTypes[i];
+            AnnotatedType annotatedType = annotatedExceptionTypes[i];
+            
+            BpmError bpmError = annotatedType.getAnnotation(BpmError.class);
+            if (bpmError != null) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Throwable> throwableType = (Class<? extends Throwable>) exceptionType;
+                
+                WorkerMethod.ThrowsExceptionInfo exceptionInfo = WorkerMethod.ThrowsExceptionInfo.builder()
+                        .exceptionType(throwableType)
+                        .bpmErrorAnnotation(bpmError)
+                        .errorCode(bpmError.errorCode())
+                        .errorMessage(StringUtils.hasText(bpmError.errorMessage()) ? bpmError.errorMessage() : "")
+                        .build();
+                
+                mappings.put(throwableType, exceptionInfo);
+                
+                log.debug("Registered BpmError mapping for exception {} with error code '{}'", 
+                        exceptionType.getSimpleName(), bpmError.errorCode());
+            }
+        }
+        
+        return mappings;
     }
 }
