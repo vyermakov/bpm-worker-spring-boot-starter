@@ -38,6 +38,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jeevision.bpm.worker.handler.BpmTaskHandler;
 import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +58,9 @@ class ExternalTaskClientConfigurationTest {
     private ObjectMapper objectMapper;
     
     @Mock
+    private BpmTaskHandler bpmTaskHandler;
+    
+    @Mock
     private ExternalTaskClientBuilder clientBuilder;
     
     @Mock
@@ -69,7 +73,7 @@ class ExternalTaskClientConfigurationTest {
 
     @BeforeEach
     void setUp() {
-        configuration = new ExternalTaskClientConfiguration(properties, workerRegistry, objectMapper);
+        configuration = new ExternalTaskClientConfiguration(properties, workerRegistry, objectMapper, bpmTaskHandler);
         lenient().when(properties.getAuth()).thenReturn(auth);
         lenient().when(properties.getWorkerId()).thenReturn(null);
         lenient().when(properties.getMaxTasks()).thenReturn(10);
