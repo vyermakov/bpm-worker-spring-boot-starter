@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation to automatically set the method return value as a process variable.
  * Supports object flattening and null handling strategies.
@@ -16,7 +18,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BpmResult {
     
+    @AliasFor("name")
+    String value() default "result";
+    
+    @AliasFor("value")
     String name() default "result";
+    
     boolean flatten() default false;
     String flattenPrefix() default "";
     NullHandling nullHandling() default NullHandling.SET_NULL;
