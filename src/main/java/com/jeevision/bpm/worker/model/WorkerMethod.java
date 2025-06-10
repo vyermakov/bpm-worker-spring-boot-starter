@@ -45,7 +45,7 @@ public class WorkerMethod {
     @Builder
     public static class ThrowsExceptionInfo {
         private Class<? extends Throwable> exceptionType;
-        private BpmError bmpErrorAnnotation;
+        private BpmError bpmErrorAnnotation;
         private String errorCode;
         private String errorMessage;
     }
