@@ -4,9 +4,9 @@
 
 ```java
 @BpmWorker("process-payment")
-@BpmResult(flatten = true, flattenPrefix = "payment_")
-public PaymentResult processPayment(@BpmVariable("amount") Double amount,
-                                   @BpmVariable("customerId") String customerId) 
+@BpmResult("payment")
+public PaymentResult processPayment(@BpmVariable Double amount,
+                                   @BpmVariable String customerId) 
         throws @BpmError(code = "INSUFFICIENT_FUNDS") PaymentException {
     
     // Your business logic here
