@@ -1,10 +1,5 @@
 package com.jeevision.bpm.worker.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.handler.BpmTaskHandler;
-import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.client.ExternalTaskClient;
 import org.camunda.bpm.client.ExternalTaskClientBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,6 +8,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jeevision.bpm.worker.handler.BpmTaskHandler;
+import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Configuration for Camunda External Task Client.

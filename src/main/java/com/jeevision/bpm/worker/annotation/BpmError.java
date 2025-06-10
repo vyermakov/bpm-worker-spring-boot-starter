@@ -20,12 +20,4 @@ public @interface BpmError {
     
     String errorCode();
     String errorMessage() default "";
-    ErrorMapping[] errorMappings() default {};
-    
-    @interface ErrorMapping {
-        Class<? extends Throwable> exception();
-        String errorCode();
-        String errorMessage() default "";
-    }
-    
 }

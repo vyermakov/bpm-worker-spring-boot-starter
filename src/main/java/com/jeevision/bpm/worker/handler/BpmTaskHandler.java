@@ -1,18 +1,14 @@
 package com.jeevision.bpm.worker.handler;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskHandler;
 import org.camunda.bpm.client.task.ExternalTaskService;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.annotation.BpmError;
 import com.jeevision.bpm.worker.annotation.BpmResult;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 
@@ -54,83 +50,6 @@ public class BpmTaskHandler implements ExternalTaskHandler {
         } catch (Exception e) {
             handleException(externalTask, externalTaskService, e);
         }
-    }
-    
-    private void handleException(ExternalTask externalTask, ExternalTaskService externalTaskService, Exception e) {
-        var taskId = externalTask.getId();
-        var topicName = externalTask.getTopicName();
-        
-        var actualException = e.getCause() != null ? e.getCause() : e;
-        
-        log.error("Error executing task {} for topic {}: {}", taskId, topicName, actualException.getMessage(), actualException);
-        
-        var throwsMapping = workerMethod.getThrowsExceptionMappings().get(actualException.getClass());
-        if (throwsMapping != null) {
-            var errorCode = throwsMapping.getErrorCode();
-            var errorMessage = StringUtils.hasText(throwsMapping.getErrorMessage()) 
-                    ? throwsMapping.getErrorMessage() 
-                    : actualException.getMessage();
-            handleBpmnError(externalTask, externalTaskService, errorCode, errorMessage);
-            return;
-        }
-        
-        var errorAnnotation = AnnotatedElementUtils.findMergedAnnotation(actualException.getClass(), BpmError.class);
-        if (errorAnnotation != null) {
-            var errorCode = errorAnnotation.errorCode();
-            var errorMessage = StringUtils.hasText(errorAnnotation.errorMessage()) 
-                    ? errorAnnotation.errorMessage() 
-                    : actualException.getMessage();
-            handleBpmnError(externalTask, externalTaskService, errorCode, errorMessage);
-            return;
-        }
-        
-        var methodErrorAnnotation = AnnotatedElementUtils.findMergedAnnotation(workerMethod.getMethod(), BpmError.class);
-        if (methodErrorAnnotation != null) {
-            var errorMapping = findErrorMapping(methodErrorAnnotation, actualException);
-            if (errorMapping.isPresent()) {
-                var mapping = errorMapping.get();
-                var errorMessage = StringUtils.hasText(mapping.errorMessage()) 
-                        ? mapping.errorMessage() 
-                        : actualException.getMessage();
-                handleBpmnError(externalTask, externalTaskService, mapping.errorCode(), errorMessage);
-                return;
-            }
-            
-            if (StringUtils.hasText(methodErrorAnnotation.errorCode())) {
-                var errorMessage = StringUtils.hasText(methodErrorAnnotation.errorMessage()) 
-                        ? methodErrorAnnotation.errorMessage() 
-                        : actualException.getMessage();
-                handleBpmnError(externalTask, externalTaskService, methodErrorAnnotation.errorCode(), errorMessage);
-                return;
-            }
-        }
-        
-        handleTechnicalFailure(externalTask, externalTaskService, actualException);
-    }
-    
-    private Optional<BpmError.ErrorMapping> findErrorMapping(BpmError bmpErrorAnnotation, Throwable exception) {
-        return Arrays.stream(bmpErrorAnnotation.errorMappings())
-                .filter(mapping -> mapping.exception().isAssignableFrom(exception.getClass()))
-                .findFirst();
-    }
-    
-    private void handleBpmnError(ExternalTask externalTask, ExternalTaskService externalTaskService, String errorCode, String errorMessage) {
-        log.info("Handling BPMN error for task {} with error code: {} and message: {}", 
-                externalTask.getId(), errorCode, errorMessage);
-        
-        var variables = Map.<String, Object>of();
-        externalTaskService.handleBpmnError(externalTask, errorCode, errorMessage, variables);
-    }
-    
-    private void handleTechnicalFailure(ExternalTask externalTask, ExternalTaskService externalTaskService, Throwable exception) {
-        var errorMessage = exception.getMessage() != null ? exception.getMessage() : exception.getClass().getSimpleName();
-        var errorDetails = String.format("%s: %s", exception.getClass().getSimpleName(), errorMessage);
-        
-        log.warn("Handling technical failure for task {} with error: {}", externalTask.getId(), errorDetails);
-        
-        var retries = 3;
-        var retryTimeout = 10000; // 10 seconds
-        externalTaskService.handleFailure(externalTask, errorMessage, errorDetails, retries, retryTimeout);
     }
     
     private Object[] prepareMethodArguments(ExternalTask externalTask) {
