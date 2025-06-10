@@ -24,7 +24,6 @@ public PaymentResult processPayment(@BpmVariable Double amount,
 **Smart Variable Injection** - Automatic type conversion from process variables  
 **Flexible Result Handling** - Flatten POJOs into multiple process variables  
 **Intelligent Error Handling** - BPMN errors vs technical failures, automatically handled  
-**Modern Java** - Records, var keyword, switch expressions, Java 17+  
 
 ## Quick Start
 
