@@ -7,7 +7,7 @@
 @BpmResult(flatten = true, flattenPrefix = "payment_")
 public PaymentResult processPayment(@BpmVariable("amount") Double amount,
                                    @BpmVariable("customerId") String customerId) 
-        throws @BpmError(errorCode = "INSUFFICIENT_FUNDS") PaymentException {
+        throws @BpmError(code = "INSUFFICIENT_FUNDS") PaymentException {
     
     // Your business logic here
     return new PaymentResult(generateId(), amount, "SUCCESS");
@@ -97,17 +97,7 @@ Sets method return value as process variables
 Maps exceptions to BPMN errors
 ```java
 // In throws clause (preferred)
-throws @BpmError(errorCode = "VALIDATION_FAILED") ValidationException
-
-// On exception class
-@BpmError(errorCode = "INSUFFICIENT_FUNDS")
-public class InsufficientFundsException extends Exception { }
-
-// Method-level mappings
-@BpmError(errorMappings = {
-    @BpmError.ErrorMapping(exception = IllegalArgumentException.class, 
-                          errorCode = "INVALID_INPUT")
-})
+throws @BpmError(code = "VALIDATION_FAILED") ValidationException
 ```
 
 ## Error Handling
@@ -120,7 +110,7 @@ The library automatically distinguishes between:
 ```java
 @BpmWorker("validate-payment")
 public String validatePayment(@BpmVariable("amount") Double amount) 
-        throws @BpmError(errorCode = "INVALID_AMOUNT") IllegalArgumentException {
+        throws @BpmError(code = "INVALID_AMOUNT") IllegalArgumentException {
     
     if (amount <= 0) {
         throw new IllegalArgumentException("Amount must be positive"); // → BPMN Error
@@ -168,8 +158,8 @@ public String processCustomer(@BpmVariable Map<String, Object> customerData,
 ```java
 @BpmWorker("handle-business-logic")
 public String handleLogic(@BpmVariable("type") String type) 
-        throws @BpmError(errorCode = "VALIDATION_ERROR") ValidationException,
-               @BpmError(errorCode = "BUSINESS_RULE_ERROR") BusinessException {
+        throws @BpmError(code = "VALIDATION_ERROR") ValidationException,
+               @BpmError(code = "BUSINESS_RULE_ERROR") BusinessException {
     
     return switch (type) {
         case "VALIDATE" -> throw new ValidationException("Failed validation");
