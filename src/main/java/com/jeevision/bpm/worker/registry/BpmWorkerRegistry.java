@@ -183,14 +183,14 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
                 WorkerMethod.ThrowsExceptionInfo exceptionInfo = WorkerMethod.ThrowsExceptionInfo.builder()
                         .exceptionType(throwableType)
                         .bpmErrorAnnotation(bpmError)
-                        .errorCode(bpmError.errorCode())
-                        .errorMessage(StringUtils.hasText(bpmError.errorMessage()) ? bpmError.errorMessage() : "")
+                        .errorCode(bpmError.code())
+                        .errorMessage(StringUtils.hasText(bpmError.message()) ? bpmError.message() : "")
                         .build();
                 
                 mappings.put(throwableType, exceptionInfo);
                 
                 log.debug("Registered BpmError mapping for exception {} with error code '{}'", 
-                        exceptionType.getSimpleName(), bpmError.errorCode());
+                        exceptionType.getSimpleName(), bpmError.code());
             }
         }
         

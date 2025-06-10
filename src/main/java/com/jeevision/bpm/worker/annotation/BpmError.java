@@ -18,6 +18,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BpmError {
     
-    String errorCode();
-    String errorMessage() default "";
+    String code();
+    String message() default "";
 }
