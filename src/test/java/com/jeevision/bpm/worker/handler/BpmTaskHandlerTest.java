@@ -71,11 +71,10 @@ class BpmTaskHandlerTest {
         // Arrange
         String taskId = "task-123";
         String topicName = "test-topic";
-        Map<String, Object> variables = Map.of("input", "test-value");
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getAllVariables()).thenReturn(variables);
+        when(externalTask.getVariable("input")).thenReturn("test-value");
 
         Object mockBean = new TestWorker();
         Method mockMethod = TestWorker.class.getMethod("processTask", String.class);
@@ -113,11 +112,10 @@ class BpmTaskHandlerTest {
         // Arrange
         String taskId = "task-123";
         String topicName = "test-topic";
-        Map<String, Object> variables = Map.of("input", "error-trigger");
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getAllVariables()).thenReturn(variables);
+        when(externalTask.getVariable("input")).thenReturn("error-trigger");
 
         Object mockBean = new TestWorkerWithError();
         Method mockMethod = TestWorkerWithError.class.getMethod("processTaskWithError", String.class);
@@ -158,11 +156,10 @@ class BpmTaskHandlerTest {
         // Arrange
         String taskId = "task-123";
         String topicName = "test-topic";
-        Map<String, Object> variables = Map.of("input", "runtime-error");
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getAllVariables()).thenReturn(variables);
+        when(externalTask.getVariable("input")).thenReturn("runtime-error");
         when(externalTask.getRetries()).thenReturn(null);
 
         Object mockBean = new TestWorkerWithRuntimeError();
@@ -197,11 +194,10 @@ class BpmTaskHandlerTest {
         // Arrange
         String taskId = "task-123";
         String topicName = "test-topic";
-        Map<String, Object> variables = Map.of("input", "test-value");
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getAllVariables()).thenReturn(variables);
+        when(externalTask.getVariable("input")).thenReturn("test-value");
 
         Object mockBean = new TestWorkerWithExternalTask();
         Method mockMethod = TestWorkerWithExternalTask.class.getMethod("processTaskWithExternalTask", ExternalTask.class, String.class);
@@ -241,11 +237,10 @@ class BpmTaskHandlerTest {
         // Arrange
         String taskId = "task-123";
         String topicName = "test-topic";
-        Map<String, Object> variables = Map.of("input", "null-result");
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getAllVariables()).thenReturn(variables);
+        when(externalTask.getVariable("input")).thenReturn("null-result");
 
         Object mockBean = new TestWorkerWithNullResult();
         Method mockMethod = TestWorkerWithNullResult.class.getMethod("processTaskWithNullResult", String.class);
@@ -282,11 +277,10 @@ class BpmTaskHandlerTest {
         // Arrange
         String taskId = "task-123";
         String topicName = "test-topic";
-        Map<String, Object> variables = Map.of("input", "flatten-result");
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getAllVariables()).thenReturn(variables);
+        when(externalTask.getVariable("input")).thenReturn("flatten-result");
 
         Object mockBean = new TestWorkerWithFlattenedResult();
         Method mockMethod = TestWorkerWithFlattenedResult.class.getMethod("processTaskWithFlattenedResult", String.class);
@@ -302,6 +296,7 @@ class BpmTaskHandlerTest {
         BpmResult resultAnnotation = mock(BpmResult.class);
         when(resultAnnotation.flatten()).thenReturn(true);
         when(resultAnnotation.includeNullProperties()).thenReturn(false);
+        when(resultAnnotation.flattenPrefix()).thenReturn("");
 
         Map<String, Object> flattenedMap = Map.of("key1", "value1", "key2", "value2");
         when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn((Map) flattenedMap);
@@ -326,11 +321,10 @@ class BpmTaskHandlerTest {
         // Arrange
         String taskId = "task-123";
         String topicName = "test-topic";
-        Map<String, Object> variables = Map.of("numberInput", "123");
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getAllVariables()).thenReturn(variables);
+        when(externalTask.getVariable("numberInput")).thenReturn("123");
 
         Object mockBean = new TestWorkerWithTypeConversion();
         Method mockMethod = TestWorkerWithTypeConversion.class.getMethod("processTaskWithTypeConversion", Integer.class);
@@ -356,59 +350,4 @@ class BpmTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).complete(eq(externalTask), any());
-        verify(objectMapper).convertValue("123", Integer.class);
-    }
-
-    // Test worker classes
-    public static class TestWorker {
-        public String processTask(@BpmVariable("input") String input) {
-            return "processed: " + input;
-        }
-    }
-
-    public static class TestWorkerWithError {
-        public String processTaskWithError(@BpmVariable("input") String input) throws @BpmError(code = "BUSINESS_ERROR", message = "Business validation failed") IllegalArgumentException {
-            if ("error-trigger".equals(input)) {
-                throw new IllegalArgumentException("Business validation failed");
-            }
-            return "processed: " + input;
-        }
-    }
-
-    public static class TestWorkerWithRuntimeError {
-        public String processTaskWithRuntimeError(@BpmVariable("input") String input) {
-            if ("runtime-error".equals(input)) {
-                throw new RuntimeException("Runtime error occurred");
-            }
-            return "processed: " + input;
-        }
-    }
-
-    public static class TestWorkerWithExternalTask {
-        public String processTaskWithExternalTask(ExternalTask externalTask, @BpmVariable("input") String input) {
-            return "processed: " + input + " for task: " + externalTask.getId();
-        }
-    }
-
-    public static class TestWorkerWithNullResult {
-        public String processTaskWithNullResult(@BpmVariable("input") String input) {
-            return null;
-        }
-    }
-
-    public static class TestWorkerWithFlattenedResult {
-        public Map<String, Object> processTaskWithFlattenedResult(@BpmVariable("input") String input) {
-            Map<String, Object> result = new HashMap<>();
-            result.put("key1", "value1");
-            result.put("key2", "value2");
-            return result;
-        }
-    }
-
-    public static class TestWorkerWithTypeConversion {
-        public String processTaskWithTypeConversion(@BpmVariable("numberInput") Integer number) {
-            return "processed number: " + number;
-        }
-    }
-}
+        verify(externalTaskService).complete(eq(external
