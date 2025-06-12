@@ -350,4 +350,65 @@ class BpmTaskHandlerTest {
         taskHandler.execute(externalTask, externalTaskService);
 
         // Assert
-        verify(externalTaskService).complete(eq(external
+        verify(externalTaskService).complete(eq(externalTask), any());
+    }
+
+    // Test worker classes
+    public static class TestWorker {
+        @BpmResult
+        public String processTask(@BpmVariable("input") String input) {
+            return "processed: " + input;
+        }
+    }
+
+    public static class TestWorkerWithError {
+        @BpmResult
+        public String processTaskWithError(@BpmVariable("input") String input) throws @BpmError(code = "BUSINESS_ERROR", message = "Business validation failed") IllegalArgumentException {
+            if ("error-trigger".equals(input)) {
+                throw new IllegalArgumentException("Business validation failed");
+            }
+            return "processed: " + input;
+        }
+    }
+
+    public static class TestWorkerWithRuntimeError {
+        @BpmResult
+        public String processTaskWithRuntimeError(@BpmVariable("input") String input) {
+            if ("runtime-error".equals(input)) {
+                throw new RuntimeException("Runtime error occurred");
+            }
+            return "processed: " + input;
+        }
+    }
+
+    public static class TestWorkerWithExternalTask {
+        @BpmResult
+        public String processTaskWithExternalTask(ExternalTask externalTask, @BpmVariable("input") String input) {
+            return "processed: " + input + " for task: " + externalTask.getId();
+        }
+    }
+
+    public static class TestWorkerWithNullResult {
+        @BpmResult
+        public String processTaskWithNullResult(@BpmVariable("input") String input) {
+            return null;
+        }
+    }
+
+    public static class TestWorkerWithFlattenedResult {
+        @BpmResult(flatten = true)
+        public Map<String, Object> processTaskWithFlattenedResult(@BpmVariable("input") String input) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("key1", "value1");
+            result.put("key2", "value2");
+            return result;
+        }
+    }
+
+    public static class TestWorkerWithTypeConversion {
+        @BpmResult
+        public String processTaskWithTypeConversion(@BpmVariable("numberInput") Integer number) {
+            return "processed number: " + number;
+        }
+    }
+}
