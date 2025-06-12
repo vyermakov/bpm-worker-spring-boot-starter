@@ -31,7 +31,6 @@ public class ExternalTaskClientConfiguration {
     private final BpmWorkerProperties properties;
     private final BpmWorkerRegistry workerRegistry;
     private final ObjectMapper objectMapper;
-    private final BpmTaskHandler bpmTaskHandler;
     
     @Bean
     public ExternalTaskClient externalTaskClient() {

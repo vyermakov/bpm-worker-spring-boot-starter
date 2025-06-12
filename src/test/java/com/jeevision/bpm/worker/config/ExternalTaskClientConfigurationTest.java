@@ -73,7 +73,7 @@ class ExternalTaskClientConfigurationTest {
 
     @BeforeEach
     void setUp() {
-        configuration = new ExternalTaskClientConfiguration(properties, workerRegistry, objectMapper, bpmTaskHandler);
+        configuration = new ExternalTaskClientConfiguration(properties, workerRegistry, objectMapper);
         lenient().when(properties.getAuth()).thenReturn(auth);
         lenient().when(properties.getWorkerId()).thenReturn(null);
         lenient().when(properties.getMaxTasks()).thenReturn(10);
