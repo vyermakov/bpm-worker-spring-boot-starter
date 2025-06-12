@@ -32,7 +32,7 @@ public PaymentResult processPayment(@BpmVariable Double amount,
 <dependency>
     <groupId>com.jeevision.bpm</groupId>
     <artifactId>bpm-worker-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
