@@ -67,7 +67,7 @@ public class BpmTaskHandler implements ExternalTaskHandler {
             return externalTask;
         }
         
-        var value = externalTask.getAllVariables().get(variableName);
+        var value = externalTask.getVariable(variableName);
         
         if (value == null) {
             if (paramInfo.isRequired()) {
