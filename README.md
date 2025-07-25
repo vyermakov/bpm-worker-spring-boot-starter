@@ -1,6 +1,6 @@
-# BPM Worker Spring Boot Starter
+ BPM Worker Spring Boot Starter
 
-> **Developer's Teaser:** Turn any Spring method into a Camunda or CIB Sevent worker with just one annotation!
+> **Developer's Teaser:** Turn any Spring method into a CIB Sevent worker with just one annotation!
 
 ```java
 @BpmWorker("process-payment")
@@ -65,7 +65,7 @@ public class OrderService {
 ## Core Annotations
 
 ### `@BpmWorker`
-Marks a method as a Camunda external task worker
+Marks a method as a CIB Seven external task worker
 ```java
 @BpmWorker("my-topic")           // Simple
 @BpmWorker(value = "my-topic",   // Advanced
@@ -174,7 +174,7 @@ public String handleLogic(@BpmVariable("type") String type)
 | Property | Default | Description |
 |----------|---------|-------------|
 | `bpm.worker.enabled` | `true` | Enable/disable workers |
-| `bpm.worker.base-url` | `http://localhost:8080/engine-rest` | Camunda REST API URL |
+| `bpm.worker.base-url` | `http://localhost:8080/engine-rest` | CIB Seven REST API URL |
 | `bpm.worker.worker-id` | `spring-boot-worker` | Worker identifier |
 | `bpm.worker.max-tasks` | `10` | Max tasks to fetch at once |
 | `bpm.worker.lock-duration` | `30000` | Task lock duration (ms) |
@@ -186,7 +186,7 @@ public String handleLogic(@BpmVariable("type") String type)
 
 - **Java 17+**
 - **Spring Boot 3.x**  
-- **Camunda 7.23+** or **CIB Seven 1.0+**
+- **CIB Seven 1.0+**
 
 ## Author
 
@@ -194,4 +194,4 @@ public String handleLogic(@BpmVariable("type") String type)
 
 ---
 
-*Build powerful Camunda / CIB Seven integrations with minimal code!*
+*Build powerful CIB Seven integrations with minimal code!*

@@ -21,7 +21,7 @@ import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
  * @email v.yermakov@gmail.com
  */
 @AutoConfiguration(after = JacksonAutoConfiguration.class)
-@ConditionalOnClass(name = "org.camunda.bpm.client.ExternalTaskClient")
+@ConditionalOnClass(name = "org.cibseven.bpm.client.ExternalTaskClient")
 @ConditionalOnProperty(prefix = "bpm.worker", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(BpmWorkerProperties.class)
 @Import({ExternalTaskClientConfiguration.class})

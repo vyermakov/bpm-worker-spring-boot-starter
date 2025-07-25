@@ -19,9 +19,9 @@ bpm:
 # Standard Spring Boot configuration
 spring:
   application:
-!!!    n: bpm-worker-example
+    name: bpm-worker-example
   
 logging:
   level:
     com.jeevision.bpm.worker: DEBUG
-    org.camunda.bpm.client: INFO
+    org.cibseven.bpm.client: INFO

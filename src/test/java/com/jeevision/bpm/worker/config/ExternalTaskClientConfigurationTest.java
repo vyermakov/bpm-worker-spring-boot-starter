@@ -21,11 +21,11 @@ import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Set;
 
-import org.camunda.bpm.client.ExternalTaskClient;
-import org.camunda.bpm.client.ExternalTaskClientBuilder;
-import org.camunda.bpm.client.interceptor.ClientRequestContext;
-import org.camunda.bpm.client.interceptor.ClientRequestInterceptor;
-import org.camunda.bpm.client.topic.TopicSubscriptionBuilder;
+import org.cibseven.bpm.client.ExternalTaskClient;
+import org.cibseven.bpm.client.ExternalTaskClientBuilder;
+import org.cibseven.bpm.client.interceptor.ClientRequestContext;
+import org.cibseven.bpm.client.interceptor.ClientRequestInterceptor;
+import org.cibseven.bpm.client.topic.TopicSubscriptionBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

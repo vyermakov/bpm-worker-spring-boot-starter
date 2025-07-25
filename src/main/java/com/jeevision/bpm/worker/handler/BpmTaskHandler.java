@@ -3,9 +3,9 @@ package com.jeevision.bpm.worker.handler;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.camunda.bpm.client.task.ExternalTask;
-import org.camunda.bpm.client.task.ExternalTaskHandler;
-import org.camunda.bpm.client.task.ExternalTaskService;
+import org.cibseven.bpm.client.task.ExternalTask;
+import org.cibseven.bpm.client.task.ExternalTaskHandler;
+import org.cibseven.bpm.client.task.ExternalTaskService;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

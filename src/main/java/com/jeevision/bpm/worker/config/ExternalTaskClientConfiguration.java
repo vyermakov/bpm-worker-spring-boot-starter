@@ -1,7 +1,7 @@
 package com.jeevision.bpm.worker.config;
 
-import org.camunda.bpm.client.ExternalTaskClient;
-import org.camunda.bpm.client.ExternalTaskClientBuilder;
+import org.cibseven.bpm.client.ExternalTaskClient;
+import org.cibseven.bpm.client.ExternalTaskClientBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -75,7 +75,7 @@ public class ExternalTaskClientConfiguration {
         log.info("Subscribed to {} BPM worker topics", workerRegistry.getRegisteredTopics().size());
     }
     
-    private static class BearerTokenInterceptor implements org.camunda.bpm.client.interceptor.ClientRequestInterceptor {
+    private static class BearerTokenInterceptor implements org.cibseven.bpm.client.interceptor.ClientRequestInterceptor {
         private final String token;
         
         public BearerTokenInterceptor(String token) {
@@ -83,12 +83,12 @@ public class ExternalTaskClientConfiguration {
         }
         
         @Override
-        public void intercept(org.camunda.bpm.client.interceptor.ClientRequestContext requestContext) {
+        public void intercept(org.cibseven.bpm.client.interceptor.ClientRequestContext requestContext) {
             requestContext.addHeader("Authorization", "Bearer " + token);
         }
     }
     
-    private static class BasicAuthInterceptor implements org.camunda.bpm.client.interceptor.ClientRequestInterceptor {
+    private static class BasicAuthInterceptor implements org.cibseven.bpm.client.interceptor.ClientRequestInterceptor {
     	
         private final String username;
         private final String password;
@@ -99,7 +99,7 @@ public class ExternalTaskClientConfiguration {
         }
 
         @Override
-        public void intercept(org.camunda.bpm.client.interceptor.ClientRequestContext requestContext) {
+        public void intercept(org.cibseven.bpm.client.interceptor.ClientRequestContext requestContext) {
             String credentials = username + ":" + password;
             String encodedCredentials = java.util.Base64.getEncoder().encodeToString(credentials.getBytes());
             requestContext.addHeader("Authorization", "Basic " + encodedCredentials);
