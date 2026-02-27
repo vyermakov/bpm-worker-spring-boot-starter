@@ -5,7 +5,9 @@ import org.cibseven.bpm.client.ExternalTaskClientBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.util.StringUtils;
 
@@ -13,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jeevision.bpm.worker.handler.BpmTaskHandler;
 import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
 
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +35,8 @@ public class ExternalTaskClientConfiguration {
     private final BpmWorkerRegistry workerRegistry;
     private final ObjectMapper objectMapper;
     
+    private ExternalTaskClient client;
+    
     @Bean
     public ExternalTaskClient externalTaskClient() {
         ExternalTaskClientBuilder builder = ExternalTaskClient.create()
@@ -44,7 +49,9 @@ public class ExternalTaskClientConfiguration {
         
         configureAuthentication(builder);
         
-        return builder.build();
+        client = builder.build();
+        
+        return client;
     }
     
 	private void configureAuthentication(ExternalTaskClientBuilder builder) {
@@ -61,8 +68,6 @@ public class ExternalTaskClientConfiguration {
     
     @EventListener(ContextRefreshedEvent.class)
     public void subscribeToTopics() {
-        ExternalTaskClient client = externalTaskClient();
-        
         workerRegistry.getAllWorkerMethods().forEach((topic, workerMethod) -> {
             log.info("Subscribing to topic: {}", topic);
             
@@ -73,6 +78,25 @@ public class ExternalTaskClientConfiguration {
         });
         
         log.info("Subscribed to {} BPM worker topics", workerRegistry.getRegisteredTopics().size());
+    }
+    
+    @EventListener(ContextClosedEvent.class)
+    public void onContextClosed() {
+        closeClient();
+    }
+    
+    @EventListener(ContextStoppedEvent.class)
+    public void onContextStopped() {
+        closeClient();
+    }
+    
+    @PreDestroy
+    public void closeClient() {
+        if (client != null) {
+            client.stop();
+            client = null;
+            log.info("Stopped BPM External Task Client");
+        }
     }
     
     private static class BearerTokenInterceptor implements org.cibseven.bpm.client.interceptor.ClientRequestInterceptor {
