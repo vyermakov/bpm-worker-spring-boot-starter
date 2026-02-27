@@ -46,13 +46,13 @@
 	</distributionManagement>
 
 	<properties>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<spring.boot.version>3.2.1</spring.boot.version>
 		<cibseven.version>2.0.0</cibseven.version>
-		<lombok.version>1.18.30</lombok.version>
+		<lombok.version>1.18.34</lombok.version>
 	</properties>
 
 	<dependencyManagement>
@@ -133,7 +133,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
 				<configuration>
-					<release>17</release>
+					<release>21</release>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
@@ -211,7 +211,7 @@
 						</executions>
 						<configuration>
 							<doclint>none</doclint>
-							<source>17</source>
+							<source>21</source>
 						</configuration>
 					</plugin>
 
