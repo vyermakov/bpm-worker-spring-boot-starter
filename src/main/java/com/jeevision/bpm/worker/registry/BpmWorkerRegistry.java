@@ -42,7 +42,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class BpmWorkerRegistry implements BeanPostProcessor {
     
     private final Map<String, WorkerMethod> workerMethods = new ConcurrentHashMap<>();
