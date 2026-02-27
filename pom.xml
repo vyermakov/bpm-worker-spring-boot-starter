@@ -161,7 +161,7 @@
 					<tagNameFormat>v@{project.version}</tagNameFormat>
 					<pushChanges>true</pushChanges>
 					<localCheckout>true</localCheckout>
-					<preparationGoals>echo skip</preparationGoals>
+					<preparationGoals>validate</preparationGoals>
 					<completionGoals>clean</completionGoals>
 				</configuration>
 			</plugin>
