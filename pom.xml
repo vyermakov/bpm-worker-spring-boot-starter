@@ -103,7 +103,7 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>${lombok.version}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Jackson for JSON processing -->
@@ -134,12 +134,10 @@
 				<version>3.13.0</version>
 				<configuration>
 					<release>17</release>
+					<compileSourceRoots>
+						<compileSourceRoot>${project.build.directory}/delomboked</compileSourceRoot>
+					</compileSourceRoots>
 					<annotationProcessorPaths>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-							<version>${lombok.version}</version>
-						</path>
 						<path>
 							<groupId>org.springframework.boot</groupId>
 							<artifactId>spring-boot-configuration-processor</artifactId>
@@ -175,6 +173,25 @@
 					<publishingServerId>maven-central</publishingServerId>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok-maven-plugin</artifactId>
+				<version>${lombok.version}</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>delombok</goal>
+						</goals>
+						<configuration>
+							<sourceDirectory>src/main/java</sourceDirectory>
+							<outputDirectory>${project.build.directory}/delomboked</outputDirectory>
+							<addOutputDirectory>false</addOutputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -187,12 +204,24 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
 						<version>3.3.0</version>
+						<configuration>
+							<includes>
+								<include>**/*.java</include>
+							</includes>
+						</configuration>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
 								<goals>
 									<goal>jar-no-fork</goal>
 								</goals>
+								<configuration>
+									<sources>
+										<source>
+											<directory>${project.build.directory}/delomboked</directory>
+										</source>
+									</sources>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
