@@ -184,7 +184,7 @@ public String handleLogic(@BpmVariable("type") String type)
 
 ## Requirements
 
-- **Java 17+**
+- **Java 21+**
 - **Spring Boot 3.x**  
 - **CIB Seven 1.0+**
 
