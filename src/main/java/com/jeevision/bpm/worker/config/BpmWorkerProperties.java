@@ -4,6 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
 
+import java.net.InetAddress;
+
 /**
  * Configuration properties for BPM Worker.
  *
@@ -15,13 +17,22 @@ import lombok.Data;
 public class BpmWorkerProperties {
     
     private String baseUrl = "http://localhost:8080/engine-rest";
-    private String workerId = "spring-boot-worker";
+    private String workerId = getDefaultWorkerId();
     private int maxTasks = 10;
     private long asyncResponseTimeout = 10000;
     private long lockDuration = 30000;
     private boolean usePriority = true;
     private Authentication auth = new Authentication();
     private Retry retry = new Retry();
+    
+    private static String getDefaultWorkerId() {
+        try {
+            String hostName = InetAddress.getLocalHost().getHostName();
+            return "spring-boot-worker-" + hostName;
+        } catch (Exception e) {
+            return "spring-boot-worker";
+        }
+    }
     
     @Data
     public static class Authentication {
@@ -34,7 +45,7 @@ public class BpmWorkerProperties {
     public static class Retry {
         private int maxRetries = 3;
         private long retryTimeout = 60000; // 1 minute in milliseconds
-        private boolean useExponentialBackoff = true;
+        private boolean useExponentialBackoff = false;
         private double backoffMultiplier = 2.0;
     }
 }

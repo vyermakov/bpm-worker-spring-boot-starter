@@ -299,7 +299,7 @@ class BpmTaskHandlerTest {
         when(resultAnnotation.flattenPrefix()).thenReturn("");
 
         Map<String, Object> flattenedMap = Map.of("key1", "value1", "key2", "value2");
-        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn((Map) flattenedMap);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn((Map<String, Object>) flattenedMap);
 
         when(workerMethod.getBean()).thenReturn(mockBean);
         when(workerMethod.getMethod()).thenReturn(mockMethod);
