@@ -1,10 +1,12 @@
 package com.jeevision.bpm.worker.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 
 import lombok.Data;
 
 import java.net.InetAddress;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Configuration properties for BPM Worker.
@@ -17,7 +19,7 @@ import java.net.InetAddress;
 public class BpmWorkerProperties {
     
     private String baseUrl = "http://localhost:8080/engine-rest";
-    private String workerId = getDefaultWorkerId();
+    private String workerId;
     private int maxTasks = 10;
     private long asyncResponseTimeout = 10000;
     private long lockDuration = 30000;
@@ -25,12 +27,16 @@ public class BpmWorkerProperties {
     private Authentication auth = new Authentication();
     private Retry retry = new Retry();
     
-    private static String getDefaultWorkerId() {
+    @Value("${spring.application.name:spring-boot-app}")
+    private String applicationName;
+    
+    @PostConstruct
+    private void init() {
         try {
             String hostName = InetAddress.getLocalHost().getHostName();
-            return "spring-boot-worker-" + hostName;
+            this.workerId = applicationName + "-" + hostName;
         } catch (Exception e) {
-            return "spring-boot-worker";
+            this.workerId = applicationName;
         }
     }
     

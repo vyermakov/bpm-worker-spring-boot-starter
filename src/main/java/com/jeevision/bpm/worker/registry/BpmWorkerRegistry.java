@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
@@ -59,12 +60,10 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
     
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        Class<?> beanClass = bean.getClass();
-        
+        var beanClass = AopUtils.getTargetClass(bean);
         Stream.of(beanClass.getDeclaredMethods())
                 .filter(method -> AnnotatedElementUtils.hasAnnotation(method, BpmWorker.class))
                 .forEach(method -> registerWorkerMethod(bean, method));
-        
         return bean;
     }
     
