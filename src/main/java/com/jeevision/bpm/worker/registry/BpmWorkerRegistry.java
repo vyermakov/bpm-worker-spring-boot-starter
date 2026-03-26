@@ -94,7 +94,7 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
                 .build();
         
         workerMethods.put(topic, workerMethod);
-        log.info("Registered BPM worker for topic '{}' -> {}.{}", topic, bean.getClass().getSimpleName(), method.getName());
+        log.info("Registered BPM worker for topic '{}' -> {}.{}", topic, AopUtils.getTargetClass(bean).getSimpleName(), method.getName());
     }
     
     private String determineTopic(BpmWorker annotation) {
