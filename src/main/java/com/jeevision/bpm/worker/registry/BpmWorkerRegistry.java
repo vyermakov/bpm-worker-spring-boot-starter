@@ -31,7 +31,6 @@ import com.jeevision.bpm.worker.annotation.BpmVariable;
 import com.jeevision.bpm.worker.annotation.BpmWorker;
 import com.jeevision.bpm.worker.model.WorkerMethod;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -94,7 +93,7 @@ public class BpmWorkerRegistry implements BeanPostProcessor {
                 .build();
         
         workerMethods.put(topic, workerMethod);
-        log.info("Registered BPM worker for topic '{}' -> {}.{}", topic, AopUtils.getTargetClass(bean).getSimpleName(), method.getName());
+        log.debug("Registered BPM worker for topic '{}' -> {}.{}", topic, AopUtils.getTargetClass(bean).getSimpleName(), method.getName());
     }
     
     private String determineTopic(BpmWorker annotation) {

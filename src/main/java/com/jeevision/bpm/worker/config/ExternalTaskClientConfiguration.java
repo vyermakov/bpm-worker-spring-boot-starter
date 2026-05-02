@@ -69,7 +69,7 @@ public class ExternalTaskClientConfiguration {
     @EventListener(ContextRefreshedEvent.class)
     public void subscribeToTopics() {
         workerRegistry.getAllWorkerMethods().forEach((topic, workerMethod) -> {
-            log.info("Subscribing to topic: {}", topic);
+            log.debug("Subscribing to topic: {}", topic);
             
             client.subscribe(topic)
                     .lockDuration(workerMethod.getWorkerAnnotation().lockDuration())
@@ -77,7 +77,7 @@ public class ExternalTaskClientConfiguration {
                     .open();
         });
         
-        log.info("Subscribed to {} BPM worker topics", workerRegistry.getRegisteredTopics().size());
+        log.info("Subscribed to BPM worker topics: {}", workerRegistry.getRegisteredTopics());
     }
     
     @EventListener(ContextClosedEvent.class)
