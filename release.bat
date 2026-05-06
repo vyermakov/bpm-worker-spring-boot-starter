@@ -1,5 +1,13 @@
 @echo off
 
+REM Set JAVA_HOME to JDK 21
+set "JAVA_HOME=C:\Program Files\Java\jdk-21"
+set "PATH=%JAVA_HOME%\bin;%PATH%"
+
+echo Using Java version:
+java -version
+echo.
+
 echo Starting Maven release process...
 echo This will:
 echo  1. Update version from SNAPSHOT to release version
