@@ -67,7 +67,13 @@ public class ExternalTaskClientConfiguration {
 	}
     
     @EventListener(ContextRefreshedEvent.class)
-    public void subscribeToTopics() {
+    public void subscribeToTopics(ContextRefreshedEvent event) {
+        // Only subscribe when the main application context is refreshed, not the management context
+        if (event.getApplicationContext().getParent() != null) {
+            log.debug("Skipping topic subscription for child context");
+            return;
+        }
+        
         workerRegistry.getAllWorkerMethods().forEach((topic, workerMethod) -> {
             log.debug("Subscribing to topic: {}", topic);
             

@@ -199,6 +199,11 @@ class ExternalTaskClientConfigurationTest {
         when(auth.getPassword()).thenReturn("");
         when(auth.getToken()).thenReturn("");
         
+        // Mock ContextRefreshedEvent with no parent (main context)
+        var mockContext = mock(org.springframework.context.ApplicationContext.class);
+        when(contextRefreshedEvent.getApplicationContext()).thenReturn(mockContext);
+        when(mockContext.getParent()).thenReturn(null);
+        
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
             when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
@@ -213,7 +218,7 @@ class ExternalTaskClientConfigurationTest {
             configuration.externalTaskClient();
             
             // When
-            configuration.subscribeToTopics();
+            configuration.subscribeToTopics(contextRefreshedEvent);
             
             // Then
             verify(externalTaskClient, times(2)).subscribe(anyString());
@@ -278,6 +283,11 @@ class ExternalTaskClientConfigurationTest {
         when(auth.getPassword()).thenReturn("");
         when(auth.getToken()).thenReturn("");
         
+        // Mock ContextRefreshedEvent with no parent (main context)
+        var mockContext = mock(org.springframework.context.ApplicationContext.class);
+        when(contextRefreshedEvent.getApplicationContext()).thenReturn(mockContext);
+        when(mockContext.getParent()).thenReturn(null);
+        
         try (MockedStatic<ExternalTaskClient> mockedStatic = mockStatic(ExternalTaskClient.class)) {
             mockedStatic.when(() -> ExternalTaskClient.create()).thenReturn(clientBuilder);
             when(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder);
@@ -292,12 +302,28 @@ class ExternalTaskClientConfigurationTest {
             configuration.externalTaskClient();
             
             // When
-            configuration.subscribeToTopics();
+            configuration.subscribeToTopics(contextRefreshedEvent);
             
             // Then
             verify(externalTaskClient, never()).subscribe(anyString());
             verify(workerRegistry).getAllWorkerMethods();
         }
+    }
+
+    @Test
+    void testSubscribeToTopics_SkipsChildContext() throws Exception {
+        // Given
+        var mockContext = mock(org.springframework.context.ApplicationContext.class);
+        var mockParentContext = mock(org.springframework.context.ApplicationContext.class);
+        
+        when(contextRefreshedEvent.getApplicationContext()).thenReturn(mockContext);
+        when(mockContext.getParent()).thenReturn(mockParentContext); // Has parent = child context (management server)
+        
+        // When
+        configuration.subscribeToTopics(contextRefreshedEvent);
+        
+        // Then - should not subscribe to any topics for child contexts
+        verify(workerRegistry, never()).getAllWorkerMethods();
     }
 
     @Test
