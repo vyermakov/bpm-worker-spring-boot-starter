@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation to map exceptions to BPMN errors.
  * Can be applied to method parameters in throws clause or exception classes.
@@ -18,6 +20,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BpmError {
     
-    String code();
+    @AliasFor("code")
+    String value() default "";
+
+    @AliasFor("value")
+    String code() default "";
+
     String message() default "";
 }
