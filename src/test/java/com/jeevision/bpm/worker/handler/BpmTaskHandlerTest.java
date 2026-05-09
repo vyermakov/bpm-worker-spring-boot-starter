@@ -353,6 +353,93 @@ class BpmTaskHandlerTest {
         verify(externalTaskService).complete(eq(externalTask), any());
     }
 
+    @Test
+    void testExecute_WithBpmnError_SpelMessageResolved() throws Exception {
+        when(externalTask.getId()).thenReturn("task-1");
+        when(externalTask.getTopicName()).thenReturn("topic");
+        when(externalTask.getVariable("input")).thenReturn("trigger");
+
+        Object bean = new TestWorkerWithSpelMessage();
+        Method method = TestWorkerWithSpelMessage.class.getMethod("process", String.class);
+
+        WorkerMethod.ParameterInfo param = WorkerMethod.ParameterInfo.builder()
+                .parameter(method.getParameters()[0])
+                .variableName("input").type(String.class).required(false).defaultValue("").build();
+
+        WorkerMethod.ThrowsExceptionInfo throwsInfo = WorkerMethod.ThrowsExceptionInfo.builder()
+                .exceptionType(IllegalStateException.class)
+                .errorCode("SOME_ERR")
+                .errorMessage("#{message}")
+                .build();
+
+        when(workerMethod.getBean()).thenReturn(bean);
+        when(workerMethod.getMethod()).thenReturn(method);
+        when(workerMethod.getParameters()).thenReturn(List.of(param));
+        when(workerMethod.getThrowsExceptionMappings()).thenReturn(Map.of(IllegalStateException.class, throwsInfo));
+
+        taskHandler.withWorkerMethod(workerMethod).execute(externalTask, externalTaskService);
+
+        verify(externalTaskService).handleBpmnError(eq(externalTask), eq("SOME_ERR"), eq("state is invalid"));
+    }
+
+    @Test
+    void testExecute_WithBpmnError_SpelCompositeMessage() throws Exception {
+        when(externalTask.getId()).thenReturn("task-2");
+        when(externalTask.getTopicName()).thenReturn("topic");
+        when(externalTask.getVariable("input")).thenReturn("trigger");
+
+        Object bean = new TestWorkerWithSpelMessage();
+        Method method = TestWorkerWithSpelMessage.class.getMethod("process", String.class);
+
+        WorkerMethod.ParameterInfo param = WorkerMethod.ParameterInfo.builder()
+                .parameter(method.getParameters()[0])
+                .variableName("input").type(String.class).required(false).defaultValue("").build();
+
+        WorkerMethod.ThrowsExceptionInfo throwsInfo = WorkerMethod.ThrowsExceptionInfo.builder()
+                .exceptionType(IllegalStateException.class)
+                .errorCode("SOME_ERR")
+                .errorMessage("Failed: #{message}")
+                .build();
+
+        when(workerMethod.getBean()).thenReturn(bean);
+        when(workerMethod.getMethod()).thenReturn(method);
+        when(workerMethod.getParameters()).thenReturn(List.of(param));
+        when(workerMethod.getThrowsExceptionMappings()).thenReturn(Map.of(IllegalStateException.class, throwsInfo));
+
+        taskHandler.withWorkerMethod(workerMethod).execute(externalTask, externalTaskService);
+
+        verify(externalTaskService).handleBpmnError(eq(externalTask), eq("SOME_ERR"), eq("Failed: state is invalid"));
+    }
+
+    @Test
+    void testExecute_WithBpmnError_SpelCodeFromExceptionProperty() throws Exception {
+        when(externalTask.getId()).thenReturn("task-3");
+        when(externalTask.getTopicName()).thenReturn("topic");
+        when(externalTask.getVariable("input")).thenReturn("trigger");
+
+        Object bean = new TestWorkerWithCustomException();
+        Method method = TestWorkerWithCustomException.class.getMethod("process", String.class);
+
+        WorkerMethod.ParameterInfo param = WorkerMethod.ParameterInfo.builder()
+                .parameter(method.getParameters()[0])
+                .variableName("input").type(String.class).required(false).defaultValue("").build();
+
+        WorkerMethod.ThrowsExceptionInfo throwsInfo = WorkerMethod.ThrowsExceptionInfo.builder()
+                .exceptionType(CustomBusinessException.class)
+                .errorCode("#{errorCode}")
+                .errorMessage("#{message}")
+                .build();
+
+        when(workerMethod.getBean()).thenReturn(bean);
+        when(workerMethod.getMethod()).thenReturn(method);
+        when(workerMethod.getParameters()).thenReturn(List.of(param));
+        when(workerMethod.getThrowsExceptionMappings()).thenReturn(Map.of(CustomBusinessException.class, throwsInfo));
+
+        taskHandler.withWorkerMethod(workerMethod).execute(externalTask, externalTaskService);
+
+        verify(externalTaskService).handleBpmnError(eq(externalTask), eq("BIZ_001"), eq("business rule violated"));
+    }
+
     // Test worker classes
     public static class TestWorker {
         @BpmResult
@@ -409,6 +496,29 @@ class BpmTaskHandlerTest {
         @BpmResult
         public String processTaskWithTypeConversion(@BpmVariable("numberInput") Integer number) {
             return "processed number: " + number;
+        }
+    }
+
+    public static class TestWorkerWithSpelMessage {
+        public void process(@BpmVariable("input") String input) throws IllegalStateException {
+            throw new IllegalStateException("state is invalid");
+        }
+    }
+
+    public static class CustomBusinessException extends RuntimeException {
+        private final String errorCode;
+
+        public CustomBusinessException(String errorCode, String message) {
+            super(message);
+            this.errorCode = errorCode;
+        }
+
+        public String getErrorCode() { return errorCode; }
+    }
+
+    public static class TestWorkerWithCustomException {
+        public void process(@BpmVariable("input") String input) throws CustomBusinessException {
+            throw new CustomBusinessException("BIZ_001", "business rule violated");
         }
     }
 }

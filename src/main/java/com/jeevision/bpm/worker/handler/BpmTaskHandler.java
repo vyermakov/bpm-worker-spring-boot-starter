@@ -2,10 +2,13 @@ package com.jeevision.bpm.worker.handler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.cibseven.bpm.client.task.ExternalTask;
 import org.cibseven.bpm.client.task.ExternalTaskHandler;
 import org.cibseven.bpm.client.task.ExternalTaskService;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class BpmTaskHandler implements ExternalTaskHandler {
-    
+
+    private static final Pattern SPEL_PATTERN = Pattern.compile("#\\{([^}]+)\\}");
+    private final SpelExpressionParser expressionParser = new SpelExpressionParser();
+
     private final ObjectMapper objectMapper;
     private final BpmWorkerProperties properties;
     private WorkerMethod workerMethod;
@@ -161,9 +167,9 @@ public class BpmTaskHandler implements ExternalTaskHandler {
         
         if (exceptionMapping != null) {
             // Report as BPMN error
-            String errorCode = exceptionMapping.getErrorCode();
+            String errorCode = resolveExpression(exceptionMapping.getErrorCode(), cause);
             String errorMessage = StringUtils.hasText(exceptionMapping.getErrorMessage()) 
-                    ? exceptionMapping.getErrorMessage() 
+                    ? resolveExpression(exceptionMapping.getErrorMessage(), cause)
                     : cause.getMessage();
             
             log.info("Handling BPMN error for task {} with code '{}': {}", 
@@ -186,6 +192,15 @@ public class BpmTaskHandler implements ExternalTaskHandler {
         }
     }
     
+    private String resolveExpression(String expression, Throwable exception) {
+        if (!StringUtils.hasText(expression)) return expression;
+        return SPEL_PATTERN.matcher(expression).replaceAll(m -> {
+            var ctx = new StandardEvaluationContext(exception);
+            Object result = expressionParser.parseExpression(m.group(1)).getValue(ctx);
+            return result != null ? result.toString() : "";
+        });
+    }
+
     private long calculateRetryTimeout(int currentRetries) {
         var retryConfig = properties.getRetry();
         long baseTimeout = retryConfig.getRetryTimeout();

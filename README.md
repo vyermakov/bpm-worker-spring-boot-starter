@@ -32,7 +32,7 @@ public PaymentResult processPayment(@BpmVariable Double amount,
 <dependency>
     <groupId>com.jeevision.bpm</groupId>
     <artifactId>bpm-worker-spring-boot-starter</artifactId>
-    <version>2.0.10</version>
+    <version>2.0.11</version>
 </dependency>
 ```
 
@@ -103,7 +103,13 @@ throws @BpmError("VALIDATION_FAILED") ValidationException
 
 // With optional message
 throws @BpmError(code = "VALIDATION_FAILED", message = "Input is invalid") ValidationException
+
+// SpEL expressions — resolve values from the thrown exception at runtime
+throws @BpmError(code = "VALIDATION_FAILED", message = "#{message}") ValidationException
+throws @BpmError(code = "#{errorCode}", message = "Validation failed: #{message}") ValidationException
 ```
+
+> `#{propertyName}` resolves any getter on the exception instance (e.g. `#{message}` → `getMessage()`, `#{errorCode}` → `getErrorCode()`).
 
 ## Error Handling
 
