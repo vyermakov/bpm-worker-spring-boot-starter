@@ -32,7 +32,7 @@ public PaymentResult processPayment(@BpmVariable Double amount,
 <dependency>
     <groupId>com.jeevision.bpm</groupId>
     <artifactId>bpm-worker-spring-boot-starter</artifactId>
-    <version>2.0.9</version>
+    <version>2.0.10</version>
 </dependency>
 ```
 
@@ -93,10 +93,16 @@ Sets method return value as process variables
 ```
 
 ### `@BpmError`
-Maps exceptions to BPMN errors
+Maps exceptions to BPMN errors. `code` and `value` are aliases — both forms are equivalent:
 ```java
-// In throws clause (preferred)
+// Using 'code' attribute
 throws @BpmError(code = "VALIDATION_FAILED") ValidationException
+
+// Using shorthand 'value' (same result)
+throws @BpmError("VALIDATION_FAILED") ValidationException
+
+// With optional message
+throws @BpmError(code = "VALIDATION_FAILED", message = "Input is invalid") ValidationException
 ```
 
 ## Error Handling
