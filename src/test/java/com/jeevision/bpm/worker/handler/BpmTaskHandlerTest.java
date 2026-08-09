@@ -17,6 +17,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jeevision.bpm.worker.annotation.BpmError;
+import com.jeevision.bpm.worker.annotation.BpmResult;
+import com.jeevision.bpm.worker.annotation.BpmVariable;
+import com.jeevision.bpm.worker.config.BpmWorkerProperties;
+import com.jeevision.bpm.worker.model.WorkerMethod;
+import org.cibseven.bpm.engine.variable.value.TypedValue;
 import org.cibseven.bpm.client.task.ExternalTask;
 import org.cibseven.bpm.client.task.ExternalTaskService;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,13 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jeevision.bpm.worker.annotation.BpmError;
-import com.jeevision.bpm.worker.annotation.BpmResult;
-import com.jeevision.bpm.worker.annotation.BpmVariable;
-import com.jeevision.bpm.worker.config.BpmWorkerProperties;
-import com.jeevision.bpm.worker.model.WorkerMethod;
 
 @ExtendWith(MockitoExtension.class)
 class BpmTaskHandlerTest {
@@ -60,10 +60,18 @@ class BpmTaskHandlerTest {
         retryConfig.setRetryTimeout(60000L);
         retryConfig.setUseExponentialBackoff(true);
         retryConfig.setBackoffMultiplier(2.0);
-        
+
         lenient().when(properties.getRetry()).thenReturn(retryConfig);
-        
+
         taskHandler = new BpmTaskHandler(objectMapper, properties);
+    }
+
+    /** Stubs {@code externalTask.getVariableTyped(name, false)} to return a {@link TypedValue}
+     *  whose {@link TypedValue#getValue()} yields the supplied plain value. */
+    private static void stubStringVariable(ExternalTask externalTask, String name, Object value) {
+        TypedValue typedValue = mock(TypedValue.class);
+        lenient().when(typedValue.getValue()).thenReturn(value);
+        lenient().when(externalTask.getVariableTyped(name, false)).thenReturn(typedValue);
     }
 
     @Test
@@ -74,7 +82,7 @@ class BpmTaskHandlerTest {
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getVariable("input")).thenReturn("test-value");
+        stubStringVariable(externalTask, "input", "test-value");
 
         Object mockBean = new TestWorker();
         Method mockMethod = TestWorker.class.getMethod("processTask", String.class);
@@ -115,7 +123,7 @@ class BpmTaskHandlerTest {
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getVariable("input")).thenReturn("error-trigger");
+        stubStringVariable(externalTask, "input", "error-trigger");
 
         Object mockBean = new TestWorkerWithError();
         Method mockMethod = TestWorkerWithError.class.getMethod("processTaskWithError", String.class);
@@ -159,7 +167,7 @@ class BpmTaskHandlerTest {
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getVariable("input")).thenReturn("runtime-error");
+        stubStringVariable(externalTask, "input", "runtime-error");
         when(externalTask.getRetries()).thenReturn(null);
 
         Object mockBean = new TestWorkerWithRuntimeError();
@@ -197,7 +205,7 @@ class BpmTaskHandlerTest {
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getVariable("input")).thenReturn("test-value");
+        stubStringVariable(externalTask, "input", "test-value");
 
         Object mockBean = new TestWorkerWithExternalTask();
         Method mockMethod = TestWorkerWithExternalTask.class.getMethod("processTaskWithExternalTask", ExternalTask.class, String.class);
@@ -240,7 +248,7 @@ class BpmTaskHandlerTest {
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getVariable("input")).thenReturn("null-result");
+        stubStringVariable(externalTask, "input", "null-result");
 
         Object mockBean = new TestWorkerWithNullResult();
         Method mockMethod = TestWorkerWithNullResult.class.getMethod("processTaskWithNullResult", String.class);
@@ -280,7 +288,7 @@ class BpmTaskHandlerTest {
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getVariable("input")).thenReturn("flatten-result");
+        stubStringVariable(externalTask, "input", "flatten-result");
 
         Object mockBean = new TestWorkerWithFlattenedResult();
         Method mockMethod = TestWorkerWithFlattenedResult.class.getMethod("processTaskWithFlattenedResult", String.class);
@@ -324,7 +332,7 @@ class BpmTaskHandlerTest {
 
         when(externalTask.getId()).thenReturn(taskId);
         when(externalTask.getTopicName()).thenReturn(topicName);
-        when(externalTask.getVariable("numberInput")).thenReturn("123");
+        stubStringVariable(externalTask, "numberInput", "123");
 
         Object mockBean = new TestWorkerWithTypeConversion();
         Method mockMethod = TestWorkerWithTypeConversion.class.getMethod("processTaskWithTypeConversion", Integer.class);
@@ -354,10 +362,47 @@ class BpmTaskHandlerTest {
     }
 
     @Test
+    void testExecute_WithSerializableVariableDeserializedBySpringObjectMapper() throws Exception {
+        // Arrange - simulates a CIB seven Object variable delivered as a TypedValue
+        // whose getValue() would fail (it uses CIB seven's bare ObjectMapper). Our handler
+        // should instead pull the raw JSON via getValueSerialized() and let Spring's
+        // ObjectMapper (which has JavaTimeModule etc.) perform the deserialization.
+        when(externalTask.getId()).thenReturn("task-1");
+        when(externalTask.getTopicName()).thenReturn("topic");
+
+        TypedValue serializable = mock(org.cibseven.bpm.engine.variable.value.SerializableValue.class);
+        lenient().when(((org.cibseven.bpm.engine.variable.value.SerializableValue) serializable).getValueSerialized()).thenReturn("{\"value\":42}");
+        lenient().when(externalTask.getVariableTyped("payload", false)).thenReturn(serializable);
+
+        Object bean = new TestWorkerWithPayload();
+        Method method = TestWorkerWithPayload.class.getMethod("process", Payload.class);
+
+        WorkerMethod.ParameterInfo param = WorkerMethod.ParameterInfo.builder()
+                .parameter(method.getParameters()[0])
+                .variableName("payload").type(Payload.class).required(false).defaultValue("").build();
+
+        Payload deserialized = new Payload();
+        deserialized.value = 42;
+        when(objectMapper.readValue("{\"value\":42}", Payload.class)).thenReturn(deserialized);
+
+        when(workerMethod.getBean()).thenReturn(bean);
+        when(workerMethod.getMethod()).thenReturn(method);
+        when(workerMethod.getParameters()).thenReturn(List.of(param));
+        when(workerMethod.getResultAnnotation()).thenReturn(null);
+
+        // Act
+        taskHandler.withWorkerMethod(workerMethod).execute(externalTask, externalTaskService);
+
+        // Assert
+        verify(objectMapper).readValue("{\"value\":42}", Payload.class);
+        verify(externalTaskService).complete(eq(externalTask), any());
+    }
+
+    @Test
     void testExecute_WithBpmnError_SpelMessageResolved() throws Exception {
         when(externalTask.getId()).thenReturn("task-1");
         when(externalTask.getTopicName()).thenReturn("topic");
-        when(externalTask.getVariable("input")).thenReturn("trigger");
+        stubStringVariable(externalTask, "input", "trigger");
 
         Object bean = new TestWorkerWithSpelMessage();
         Method method = TestWorkerWithSpelMessage.class.getMethod("process", String.class);
@@ -386,14 +431,15 @@ class BpmTaskHandlerTest {
     void testExecute_WithBpmnError_SpelCompositeMessage() throws Exception {
         when(externalTask.getId()).thenReturn("task-2");
         when(externalTask.getTopicName()).thenReturn("topic");
-        when(externalTask.getVariable("input")).thenReturn("trigger");
+        stubStringVariable(externalTask, "input", "trigger");
 
         Object bean = new TestWorkerWithSpelMessage();
         Method method = TestWorkerWithSpelMessage.class.getMethod("process", String.class);
 
         WorkerMethod.ParameterInfo param = WorkerMethod.ParameterInfo.builder()
                 .parameter(method.getParameters()[0])
-                .variableName("input").type(String.class).required(false).defaultValue("").build();
+                .variableName("input").type(String.class).required(false)
+                .defaultValue("").build();
 
         WorkerMethod.ThrowsExceptionInfo throwsInfo = WorkerMethod.ThrowsExceptionInfo.builder()
                 .exceptionType(IllegalStateException.class)
@@ -415,14 +461,15 @@ class BpmTaskHandlerTest {
     void testExecute_WithBpmnError_SpelCodeFromExceptionProperty() throws Exception {
         when(externalTask.getId()).thenReturn("task-3");
         when(externalTask.getTopicName()).thenReturn("topic");
-        when(externalTask.getVariable("input")).thenReturn("trigger");
+        stubStringVariable(externalTask, "input", "trigger");
 
         Object bean = new TestWorkerWithCustomException();
         Method method = TestWorkerWithCustomException.class.getMethod("process", String.class);
 
         WorkerMethod.ParameterInfo param = WorkerMethod.ParameterInfo.builder()
                 .parameter(method.getParameters()[0])
-                .variableName("input").type(String.class).required(false).defaultValue("").build();
+                .variableName("input").type(String.class).required(false)
+                .defaultValue("").build();
 
         WorkerMethod.ThrowsExceptionInfo throwsInfo = WorkerMethod.ThrowsExceptionInfo.builder()
                 .exceptionType(CustomBusinessException.class)
@@ -440,7 +487,6 @@ class BpmTaskHandlerTest {
         verify(externalTaskService).handleBpmnError(eq(externalTask), eq("BIZ_001"), eq("business rule violated"));
     }
 
-    // Test worker classes
     public static class TestWorker {
         @BpmResult
         public String processTask(@BpmVariable("input") String input) {
@@ -497,6 +543,17 @@ class BpmTaskHandlerTest {
         public String processTaskWithTypeConversion(@BpmVariable("numberInput") Integer number) {
             return "processed number: " + number;
         }
+    }
+
+    public static class TestWorkerWithPayload {
+        @BpmResult
+        public String process(@BpmVariable("payload") Payload payload) {
+            return "value=" + payload.value;
+        }
+    }
+
+    public static class Payload {
+        public int value;
     }
 
     public static class TestWorkerWithSpelMessage {

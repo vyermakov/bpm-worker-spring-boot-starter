@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 import org.cibseven.bpm.client.task.ExternalTask;
 import org.cibseven.bpm.client.task.ExternalTaskHandler;
 import org.cibseven.bpm.client.task.ExternalTaskService;
+import org.cibseven.bpm.engine.variable.value.SerializableValue;
+import org.cibseven.bpm.engine.variable.value.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.StringUtils;
@@ -68,24 +70,45 @@ public class BpmTaskHandler implements ExternalTaskHandler {
     
     private Object resolveParameterValue(ExternalTask externalTask, WorkerMethod.ParameterInfo paramInfo) {
         var variableName = paramInfo.getVariableName();
-        
+
         if (paramInfo.getType().equals(ExternalTask.class)) {
             return externalTask;
         }
-        
-        var value = externalTask.getVariable(variableName);
-        
+
+        Object value = null;
+        TypedValue typedValue = externalTask.getVariableTyped(variableName, false);
+
+        if (typedValue != null) {
+            if (typedValue instanceof SerializableValue serializable) {
+                String serialized = serializable.getValueSerialized();
+                if (serialized != null) {
+                    value = deserialize(serialized, paramInfo.getType());
+                }
+            } else {
+                value = typedValue.getValue();
+            }
+        }
+
         if (value == null) {
             if (paramInfo.isRequired()) {
                 throw new IllegalArgumentException("Required variable '" + variableName + "' not found");
             }
-            
+
             if (StringUtils.hasText(paramInfo.getDefaultValue())) {
                 value = paramInfo.getDefaultValue();
             }
         }
-        
+
         return convertValue(value, paramInfo.getType());
+    }
+
+    private Object deserialize(String json, Class<?> targetType) {
+        try {
+            return objectMapper.readValue(json, targetType);
+        } catch (Exception e) {
+            log.warn("Could not deserialize value to type {}: {}", targetType, e.getMessage());
+            return null;
+        }
     }
     
     private Object convertValue(Object value, Class<?> targetType) {
