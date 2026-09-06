@@ -23,9 +23,9 @@ import com.jeevision.bpm.worker.annotation.BpmResult;
 import com.jeevision.bpm.worker.annotation.BpmVariable;
 import com.jeevision.bpm.worker.config.BpmWorkerProperties;
 import com.jeevision.bpm.worker.model.WorkerMethod;
-import org.cibseven.bpm.engine.variable.value.TypedValue;
-import org.cibseven.bpm.client.task.ExternalTask;
-import org.cibseven.bpm.client.task.ExternalTaskService;
+import org.operaton.bpm.engine.variable.value.TypedValue;
+import org.operaton.bpm.client.task.ExternalTask;
+import org.operaton.bpm.client.task.ExternalTaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -370,8 +370,8 @@ class BpmTaskHandlerTest {
         when(externalTask.getId()).thenReturn("task-1");
         when(externalTask.getTopicName()).thenReturn("topic");
 
-        TypedValue serializable = mock(org.cibseven.bpm.engine.variable.value.SerializableValue.class);
-        lenient().when(((org.cibseven.bpm.engine.variable.value.SerializableValue) serializable).getValueSerialized()).thenReturn("{\"value\":42}");
+        TypedValue serializable = mock(org.operaton.bpm.engine.variable.value.SerializableValue.class);
+        lenient().when(((org.operaton.bpm.engine.variable.value.SerializableValue) serializable).getValueSerialized()).thenReturn("{\"value\":42}");
         lenient().when(externalTask.getVariableTyped("payload", false)).thenReturn(serializable);
 
         Object bean = new TestWorkerWithPayload();

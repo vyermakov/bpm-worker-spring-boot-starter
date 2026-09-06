@@ -4,7 +4,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -20,8 +19,8 @@ import com.jeevision.bpm.worker.registry.BpmWorkerRegistry;
  * @author Slava Yermakov
  * @email v.yermakov@gmail.com
  */
-@AutoConfiguration(after = JacksonAutoConfiguration.class)
-@ConditionalOnClass(name = "org.cibseven.bpm.client.ExternalTaskClient")
+@AutoConfiguration(afterName = "org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration")
+@ConditionalOnClass(name = "org.operaton.bpm.client.ExternalTaskClient")
 @ConditionalOnProperty(prefix = "bpm.worker", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(BpmWorkerProperties.class)
 @Import({ExternalTaskClientConfiguration.class})

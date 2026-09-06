@@ -1,6 +1,6 @@
- BPM Worker Spring Boot Starter
+BPM Worker Spring Boot Starter
 
-> **Developer's Teaser:** Turn any Spring method into a CIB Sevent worker with just one annotation!
+> **Developer's Teaser:** Turn any Spring method into an Operaton worker with just one annotation!
 
 ```java
 @BpmWorker("process-payment")
@@ -32,7 +32,7 @@ public PaymentResult processPayment(@BpmVariable Double amount,
 <dependency>
     <groupId>com.jeevision.bpm</groupId>
     <artifactId>bpm-worker-spring-boot-starter</artifactId>
-    <version>2.0.11</version>
+    <version>2.0.14-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -41,11 +41,12 @@ public PaymentResult processPayment(@BpmVariable Double amount,
 bpm:
   worker:
     base-url: http://localhost:8080/engine-rest
-    worker-id: my-app-worker
     auth:
       username: demo
       password: demo
 ```
+
+> `worker-id` is auto-generated from `spring.application.name` and hostname.
 
 ### 3. Create Workers
 ```java
@@ -65,7 +66,7 @@ public class OrderService {
 ## Core Annotations
 
 ### `@BpmWorker`
-Marks a method as a CIB Seven external task worker
+Marks a method as an Operaton external task worker
 ```java
 @BpmWorker("my-topic")           // Simple
 @BpmWorker(value = "my-topic",   // Advanced
@@ -186,8 +187,8 @@ public String handleLogic(@BpmVariable("type") String type)
 | Property | Default | Description |
 |----------|---------|-------------|
 | `bpm.worker.enabled` | `true` | Enable/disable workers |
-| `bpm.worker.base-url` | `http://localhost:8080/engine-rest` | CIB Seven REST API URL |
-| `bpm.worker.worker-id` | `spring-boot-worker` | Worker identifier |
+| `bpm.worker.base-url` | `http://localhost:8080/engine-rest` | Operaton REST API URL |
+| `bpm.worker.worker-id` | `<app-name>-<hostname>` | Worker identifier (auto-detected) |
 | `bpm.worker.max-tasks` | `10` | Max tasks to fetch at once |
 | `bpm.worker.lock-duration` | `30000` | Task lock duration (ms) |
 | `bpm.worker.auth.username` | - | Basic auth username |
@@ -197,8 +198,8 @@ public String handleLogic(@BpmVariable("type") String type)
 ## Requirements
 
 - **Java 21+**
-- **Spring Boot 3.x**  
-- **CIB Seven 1.0+**
+- **Spring Boot 4.x**  
+- **Operaton 2.1+**
 
 ## Author
 
@@ -206,4 +207,4 @@ public String handleLogic(@BpmVariable("type") String type)
 
 ---
 
-*Build powerful CIB Seven integrations with minimal code!*
+*Build powerful Operaton integrations with minimal code!*

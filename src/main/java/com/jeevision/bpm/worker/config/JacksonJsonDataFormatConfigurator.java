@@ -1,18 +1,27 @@
 package com.jeevision.bpm.worker.config;
 
-import org.cibseven.bpm.client.spi.DataFormatConfigurator;
-import org.cibseven.bpm.client.variable.impl.format.json.JacksonJsonDataFormat;
+import org.operaton.bpm.client.spi.DataFormatConfigurator;
+import org.operaton.bpm.client.variable.impl.format.json.JacksonJsonDataFormat;
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Configures the Camunda external task client's internal ObjectMapper with
- * JavaTimeModule to support Java 8 date/time types (LocalDateTime, etc.)
- * during variable serialization.
+ * Configures Operaton external task client's JSON serialization
+ * to use Spring's ObjectMapper with all its settings (date format, etc.).
  *
  * @author Slava Yermakov
  */
 public class JacksonJsonDataFormatConfigurator implements DataFormatConfigurator<JacksonJsonDataFormat> {
+
+    private static ObjectMapper springObjectMapper;
+
+    /**
+     * Should be called before {@code ExternalTaskClientBuilder.build()}
+     * to apply Spring's ObjectMapper settings.
+     */
+    public static void setObjectMapper(ObjectMapper objectMapper) {
+        springObjectMapper = objectMapper;
+    }
 
     @Override
     public Class<JacksonJsonDataFormat> getDataFormatClass() {
@@ -21,6 +30,8 @@ public class JacksonJsonDataFormatConfigurator implements DataFormatConfigurator
 
     @Override
     public void configure(JacksonJsonDataFormat dataFormat) {
-        dataFormat.getObjectMapper().registerModule(new JavaTimeModule());
+        if (springObjectMapper != null) {
+            dataFormat.setObjectMapper(springObjectMapper);
+        }
     }
 }

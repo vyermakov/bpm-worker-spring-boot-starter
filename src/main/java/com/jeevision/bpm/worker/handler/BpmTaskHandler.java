@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.cibseven.bpm.client.task.ExternalTask;
-import org.cibseven.bpm.client.task.ExternalTaskHandler;
-import org.cibseven.bpm.client.task.ExternalTaskService;
-import org.cibseven.bpm.engine.variable.value.SerializableValue;
-import org.cibseven.bpm.engine.variable.value.TypedValue;
+import org.operaton.bpm.client.task.ExternalTask;
+import org.operaton.bpm.client.task.ExternalTaskHandler;
+import org.operaton.bpm.client.task.ExternalTaskService;
+import org.operaton.bpm.engine.variable.value.SerializableValue;
+import org.operaton.bpm.engine.variable.value.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.StringUtils;

@@ -1,9 +1,9 @@
 package com.jeevision.bpm.worker.config;
 
-import org.cibseven.bpm.client.ExternalTaskClient;
-import org.cibseven.bpm.client.ExternalTaskClientBuilder;
-import org.cibseven.bpm.client.interceptor.ClientRequestContext;
-import org.cibseven.bpm.client.interceptor.ClientRequestInterceptor;
+import org.operaton.bpm.client.ExternalTaskClient;
+import org.operaton.bpm.client.ExternalTaskClientBuilder;
+import org.operaton.bpm.client.interceptor.ClientRequestContext;
+import org.operaton.bpm.client.interceptor.ClientRequestInterceptor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +51,7 @@ public class ExternalTaskClientConfiguration {
         
         configureAuthentication(builder);
         
+        JacksonJsonDataFormatConfigurator.setObjectMapper(objectMapper);
         client = builder.build();
         
         return client;
