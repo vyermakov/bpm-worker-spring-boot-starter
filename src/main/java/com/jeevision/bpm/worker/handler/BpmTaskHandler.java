@@ -186,20 +186,19 @@ public class BpmTaskHandler implements ExternalTaskHandler {
         Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
         
         // Check if this exception type is mapped to a BpmError
-//        var exceptionMapping = workerMethod.getThrowsExceptionMappings().get(cause.getClass());
         var exceptionMapping = workerMethod.getThrowsExceptionMappings()
                 .entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().isAssignableFrom(cause.getClass()))
                 .map(Map.Entry::getValue)
-                .findFirst();
+                .findFirst()
+                .orElse(null);
         
-        if (exceptionMapping.isPresent()) {
+        if (exceptionMapping != null) {
             // Report as BPMN error
-            var mappedException = exceptionMapping.get();
-            String errorCode = resolveExpression(mappedException.getErrorCode(), cause);
-            String errorMessage = StringUtils.hasText(mappedException.getErrorMessage()) 
-                    ? resolveExpression(mappedException.getErrorMessage(), cause)
+            String errorCode = resolveExpression(exceptionMapping.getErrorCode(), cause);
+            String errorMessage = StringUtils.hasText(exceptionMapping.getErrorMessage()) 
+                    ? resolveExpression(exceptionMapping.getErrorMessage(), cause)
                     : cause.getMessage();
             
             log.info("Handling BPMN error for task {} with code '{}': {}", 
